@@ -1,1 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#73d7ff"/><stop offset=".55" stop-color="#1676d2"/><stop offset="1" stop-color="#06418f"/></linearGradient><linearGradient id="y" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff8a8"/><stop offset="1" stop-color="#f0aa00"/></linearGradient></defs><rect x="36" y="48" width="440" height="370" rx="96" fill="url(#b)"/><path d="M154 401 88 474l14-107z" fill="#06418f"/><circle cx="190" cy="232" r="34" fill="white"/><circle cx="266" cy="232" r="34" fill="white"/><circle cx="342" cy="232" r="34" fill="white"/><circle cx="370" cy="128" r="56" fill="url(#y)" stroke="white" stroke-width="18"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="b" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#73d7ff"/>
+      <stop offset=".55" stop-color="#1676d2"/>
+      <stop offset="1" stop-color="#06418f"/>
+    </linearGradient>
+    <linearGradient id="y" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff8a8"/>
+      <stop offset="1" stop-color="#f0aa00"/>
+    </linearGradient>
+  </defs>
+  <rect x="36" y="48" width="440" height="370" rx="96" fill="url(#b)"/>
+  <path d="M154 401 88 474l14-107z" fill="#06418f"/>
+  <circle cx="190" cy="232" r="34" fill="white"/>
+  <circle cx="266" cy="232" r="34" fill="white"/>
+  <circle cx="342" cy="232" r="34" fill="white"/>
+  <circle cx="370" cy="128" r="56" fill="url(#y)" stroke="white" stroke-width="18"/>
+</svg>

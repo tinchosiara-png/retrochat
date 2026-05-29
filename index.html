@@ -1,5 +1,804 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1676d2"><title>RetroChat v0.1.0</title><link rel="manifest" href="manifest.json"><style>
-:root{--b:#1676d2;--b2:#58b8ff;--d:#063f8d;--s:#dff2ff;--y:#fff2a8;--t:#06264c}*{box-sizing:border-box}body{margin:0;height:100vh;font-family:Tahoma,Verdana,Arial,sans-serif;color:var(--t);background:linear-gradient(135deg,#69baff,#dff4ff 48%,#fff8bf);overflow:hidden}button,input,textarea{font:inherit}.app{height:100%;display:grid;place-items:center;padding:10px}.win{width:min(1040px,100%);height:min(720px,100%);background:#eef8ff;border:1px solid #0755a0;border-radius:14px;box-shadow:0 18px 45px #00235040;overflow:hidden;display:flex;flex-direction:column}.bar{min-height:42px;background:linear-gradient(#35a6ff,#0e65c6 52%,#084da2);color:white;display:flex;align-items:center;gap:10px;padding:8px 10px;text-shadow:0 1px 1px #00336d}.orb{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff,#7bd5ff 35%,#0873d1 72%);border:1px solid #fff}.bar small{margin-left:auto;opacity:.85}.x{width:22px;height:22px;border-radius:5px;border:1px solid #ffffffaa;background:linear-gradient(#fff,#90cfff);color:#064a9b;display:grid;place-items:center;font-weight:bold}.body{flex:1;min-height:0;display:flex}.auth{width:100%;display:grid;place-items:center;padding:18px;overflow:auto}.card{width:min(430px,100%);background:linear-gradient(#f7fdff,#d8f0ff);border:1px solid #74aee0;border-radius:22px;box-shadow:0 12px 28px #00326433;padding:24px}.brand{text-align:center;margin-bottom:16px}.logo{width:90px;height:90px;margin:0 auto 10px;border-radius:24px;background:linear-gradient(135deg,#11a2ff,#005fb8);border:3px solid white;box-shadow:0 8px 20px #003f8d40;color:white;display:grid;place-items:center;font-size:42px}.brand h1{margin:0;font-size:30px;color:#0b64bd}.brand p{margin:4px 0 0;font-size:13px;color:#375f84}.tabs{display:flex;background:#c8e7ff;border:1px solid #8cbfe8;border-radius:12px;padding:4px;gap:4px;margin-bottom:14px}.tab{flex:1;border:0;border-radius:9px;padding:9px;background:transparent;color:#185083;cursor:pointer;font-weight:bold}.tab.on{background:linear-gradient(#fff,#e8f7ff);box-shadow:0 1px 3px #0002}.field{margin:10px 0}.field label{display:block;font-size:12px;font-weight:bold;margin-bottom:5px;color:#164a7f}.field input,.composer textarea{width:100%;border:1px solid #7fb5dc;border-radius:10px;background:white;padding:11px 12px;outline:none;box-shadow:inset 0 1px 4px #0002}.primary{width:100%;border:1px solid #be8a00;border-radius:12px;padding:12px 14px;background:linear-gradient(#fff6ae,#ffc928 48%,#f1a900);color:#4a3100;font-weight:bold;cursor:pointer}.secondary{border:1px solid #6aa3d5;border-radius:10px;padding:9px 12px;background:linear-gradient(#fff,#d8efff);color:#0b4e8f;font-weight:bold;cursor:pointer}.danger{border-color:#df8f8f;background:linear-gradient(#fff,#ffe1e1);color:#9b1c1c}.status{margin-top:12px;min-height:19px;font-size:12px;color:#164a7f;text-align:center}.shell{flex:1;min-height:0;display:none;width:100%}.shell.on{display:flex}.side{width:330px;min-width:280px;max-width:38%;background:linear-gradient(#f8fdff,#cbeaff);border-right:1px solid #72aedd;display:flex;flex-direction:column;min-height:0}.profile{padding:14px;display:flex;gap:10px;align-items:center;border-bottom:1px solid #9ac6e6;background:linear-gradient(#ffffffcc,#e5f6ffcc)}.av{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#27cfff,#0b62c2);border:2px solid white;color:white;display:grid;place-items:center;font-size:20px;font-weight:bold;flex:0 0 auto}.profile h2{font-size:15px;margin:0}.profile p{font-size:12px;margin:3px 0 0;color:#4c6f8d}.tools{padding:10px;display:flex;gap:8px;border-bottom:1px solid #9ac6e6}.tools button{flex:1;font-size:12px}.contacts{overflow:auto;padding:8px;flex:1}.contact{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid transparent;border-radius:12px;cursor:pointer;margin-bottom:6px}.contact:hover,.contact.on{background:#fff9d2;border-color:#e5bc47}.dot{width:11px;height:11px;border-radius:50%;background:#22b14c;box-shadow:0 0 0 2px white}.contact strong{display:block;font-size:13px}.contact small{display:block;font-size:11px;color:#5f7488}.chat{flex:1;min-width:0;display:flex;flex-direction:column;background:linear-gradient(#f9fdff,#e8f6ff)}.head{padding:12px 14px;border-bottom:1px solid #9ac6e6;background:linear-gradient(#fff,#dff3ff);display:flex;align-items:center;gap:10px}.head h3{margin:0;font-size:15px}.head p{margin:2px 0 0;font-size:12px;color:#557}.messages{flex:1;overflow:auto;padding:14px;background:radial-gradient(circle at 10% 10%,#cceeff,transparent 26%),radial-gradient(circle at 90% 90%,#fff3b3,transparent 24%),#ffffffaa}.empty{height:100%;display:grid;place-items:center;text-align:center;color:#52708b;padding:22px}.msg{max-width:78%;margin:0 0 10px;padding:9px 11px;border-radius:14px;border:1px solid #a7c9e4;background:white;box-shadow:0 2px 7px #00285014;word-wrap:break-word}.msg.me{margin-left:auto;background:#fff7c5;border-color:#dfbd48}.who{font-size:11px;font-weight:bold;color:#0e5aaa;margin-bottom:4px}.txt{font-size:14px;white-space:pre-wrap;line-height:1.3}.time{font-size:10px;color:#667;text-align:right;margin-top:5px}.composer{display:flex;gap:8px;padding:10px;border-top:1px solid #9ac6e6;background:linear-gradient(#fff,#dff3ff);align-items:flex-end}.composer textarea{min-height:44px;max-height:110px;resize:none}.composer .primary{width:auto;min-width:88px;height:44px}.modal{position:fixed;inset:0;background:#00122d55;display:none;place-items:center;padding:14px;z-index:10}.modal.on{display:grid}.box{width:min(420px,100%);background:#eef8ff;border:1px solid #0755a0;border-radius:16px;overflow:hidden;box-shadow:0 18px 45px #00235040}.boxbody{padding:16px}.row{display:flex;gap:8px}.row>*{flex:1}.linkbox{font-size:12px;background:white;border:1px dashed #7fb5dc;padding:8px;border-radius:10px;word-break:break-all;margin-top:10px;display:none}.back{display:none}@media(max-width:720px){.app{padding:0}.win{height:100%;max-height:none;border-radius:0;border:0}.bar small{display:none}.shell.on{display:block;position:relative}.side{width:100%;max-width:none;height:100%}.chat{position:absolute;inset:0;transform:translateX(100%);transition:.22s ease;z-index:3}.shell.open .chat{transform:translateX(0)}.back{display:inline-flex!important}.msg{max-width:88%}}
-</style></head><body><div class="app"><div class="win"><div class="bar"><div class="orb"></div><strong>RetroChat</strong><small>v0.1.0 · Messenger vibes, moderno por dentro</small><div class="x">×</div></div><div class="body"><section id="auth" class="auth"><div class="card"><div class="brand"><div class="logo">💬</div><h1>RetroChat</h1><p>Conectado como en 2004, funcionando como en 2026.</p></div><div class="tabs"><button id="tabL" class="tab on">Iniciar sesión</button><button id="tabR" class="tab">Crear cuenta</button></div><div id="login"><div class="field"><label>Celular</label><input id="loginPhone" inputmode="numeric" placeholder="543471..."></div><div class="field"><label>PIN</label><input id="loginPin" type="password" inputmode="numeric" placeholder="••••"></div><button id="btnLogin" class="primary">Iniciar sesión</button></div><div id="register" style="display:none"><div class="field"><label>Nombre visible</label><input id="regName" placeholder="Tincho Siara"></div><div class="field"><label>Celular</label><input id="regPhone" inputmode="numeric" placeholder="543471..."></div><div class="field"><label>PIN</label><input id="regPin" type="password" inputmode="numeric" placeholder="mínimo 4 números"></div><button id="btnRegister" class="primary">Crear cuenta</button></div><div id="authStatus" class="status"></div></div></section><section id="shell" class="shell"><aside class="side"><div class="profile"><div class="av" id="meAv">T</div><div><h2 id="meName">Usuario</h2><p><span class="dot" style="display:inline-block;vertical-align:-1px"></span> En línea</p></div></div><div class="tools"><button id="add" class="secondary">Agregar</button><button id="ref" class="secondary">Actualizar</button><button id="out" class="secondary danger">Salir</button></div><div id="contacts" class="contacts"></div></aside><main class="chat"><div class="head"><button id="back" class="secondary back">←</button><div class="av" id="chatAv">?</div><div><h3 id="chatTitle">Elegí un contacto</h3><p id="chatSub">Los mensajes se guardan en tu Sheet RetroChat.</p></div></div><div id="messages" class="messages"><div class="empty"><div><h2>Bienvenido a RetroChat</h2><p>Agregá un contacto por celular o abrí uno existente.</p></div></div></div><div class="composer"><textarea id="text" placeholder="Escribí un mensaje..." disabled></textarea><button id="send" class="primary" disabled>Enviar</button></div></main></section></div></div></div><div id="modal" class="modal"><div class="box"><div class="bar"><div class="orb"></div><strong>Agregar contacto</strong><button id="close" class="x">×</button></div><div class="boxbody"><div class="field"><label>Celular del contacto</label><input id="contactPhone" inputmode="numeric" placeholder="543471..."></div><div class="row"><button id="find" class="primary">Buscar</button><button id="invite" class="secondary">Invitar WhatsApp</button></div><div id="modalStatus" class="status"></div><div id="inviteBox" class="linkbox"></div></div></div></div><script>
-(()=>{const API='https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec',LS='retrochat_user_v010',INV='retrochat_invite_v010',$=id=>document.getElementById(id);let me=null,contacts=[],active=null,chat=null,timer=null,sig='';const q=new URLSearchParams(location.search),inv=q.get('invite')||'';if(inv)localStorage.setItem(INV,inv);function st(el,m){el.textContent=m||''}function ini(n){return String(n||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'?'}function enc(d){let p=new URLSearchParams();Object.entries(d||{}).forEach(([k,v])=>p.set(k,v==null?'':String(v)));return p.toString()}async function api(a,d={}){let r=await fetch(API+'?action='+encodeURIComponent(a)+'&'+enc(d),{cache:'no-store',redirect:'follow'});if(!r.ok)throw Error('HTTP '+r.status);let j=await r.json();if(!j.ok)throw Error(j.error||'Error desconocido');return j}function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}function save(u){localStorage.setItem(LS,JSON.stringify(u))}function load(){try{return JSON.parse(localStorage.getItem(LS)||'null')}catch{return null}}function showAuth(){$('auth').style.display='grid';$('shell').classList.remove('on');stop()}function showApp(){$('auth').style.display='none';$('shell').classList.add('on');$('meName').textContent=me.nombre||me.alias||'Usuario';$('meAv').textContent=ini(me.nombre||me.alias);renderContacts()}function renderContacts(){let b=$('contacts');b.innerHTML='';if(!contacts.length){b.innerHTML='<div class="empty" style="height:auto;padding:18px"><div><b>Sin contactos todavía</b><p>Usá Agregar para buscar por celular o invitar.</p></div></div>';return}contacts.forEach(c=>{let d=document.createElement('div');d.className='contact'+(active&&active.id===c.id?' on':'');d.innerHTML=`<div class="dot"></div><div class="av">${ini(c.nombre||c.alias)}</div><div><strong>${esc(c.nombre||c.alias||'Contacto')}</strong><small>${esc(c.frase||c.telefono||'Disponible')}</small></div>`;d.onclick=()=>openContact(c);b.appendChild(d)})}async function refresh(){if(!me)return;let r=await api('getContacts',{usuario_id:me.id});contacts=r.contactos||[];renderContacts()}async function openContact(c){active=c;renderContacts();$('chatTitle').textContent=c.nombre||c.alias||'Contacto';$('chatSub').textContent=c.telefono?'Celular: '+c.telefono:'Chat directo';$('chatAv').textContent=ini(c.nombre||c.alias);$('text').disabled=false;$('send').disabled=false;$('shell').classList.add('open');let r=await api('createOrGetDirectChat',{usuario_id:me.id,contacto_id:c.id});chat=r.chat;await messages();start()}async function messages(){if(!chat)return;let r=await api('getMessages',{chat_id:chat.chat_id,usuario_id:me.id,limit:100});let ms=r.mensajes||[],s=ms.map(m=>m.id).join('|');if(s!==sig){sig=s;renderMessages(ms)}}function renderMessages(ms){let b=$('messages');if(!ms.length){b.innerHTML='<div class="empty"><div><h2>Sin mensajes</h2><p>Mandá el primero. Que sea histórico.</p></div></div>';return}b.innerHTML='';ms.forEach(m=>{let d=document.createElement('div');d.className='msg'+(m.usuario_id===me.id?' me':'');d.innerHTML=`<div class="who">${esc(m.usuario_nombre||'Usuario')} dice:</div><div class="txt">${esc(m.texto||'')}</div><div class="time">${esc(m.fecha||'')}</div>`;b.appendChild(d)});b.scrollTop=b.scrollHeight}async function send(){let t=$('text').value.trim();if(!t||!chat)return;$('send').disabled=true;try{await api('sendMessage',{chat_id:chat.chat_id,usuario_id:me.id,texto:t});$('text').value='';await messages()}catch(e){alert('No se pudo enviar: '+e.message)}finally{$('send').disabled=false;$('text').focus()}}function start(){stop();timer=setInterval(()=>messages().catch(()=>{}),5000)}function stop(){if(timer)clearInterval(timer);timer=null}function tab(w){let l=w==='l';$('tabL').classList.toggle('on',l);$('tabR').classList.toggle('on',!l);$('login').style.display=l?'block':'none';$('register').style.display=l?'none':'block';st($('authStatus'),'')}async function login(){st($('authStatus'),'Conectando...');try{let r=await api('login',{telefono:$('loginPhone').value.trim(),pin:$('loginPin').value.trim()});me=r.usuario;contacts=r.contactos||[];save(me);st($('authStatus'),'');showApp()}catch(e){st($('authStatus'),e.message)}}async function reg(){st($('authStatus'),'Creando cuenta...');try{let r=await api('registerUser',{nombre:$('regName').value.trim(),telefono:$('regPhone').value.trim(),pin:$('regPin').value.trim(),invite_code:localStorage.getItem(INV)||''});localStorage.removeItem(INV);me=r.usuario;contacts=[];save(me);showApp();refresh().catch(()=>{})}catch(e){st($('authStatus'),e.message)}}async function find(){let ph=$('contactPhone').value.trim();st($('modalStatus'),'Buscando...');$('inviteBox').style.display='none';try{let r=await api('findUserByPhone',{telefono:ph});if(!r.found){st($('modalStatus'),'No está registrado. Podés invitarlo por WhatsApp.');return}if(r.usuario.id===me.id){st($('modalStatus'),'Ese sos vos, campeón.');return}await api('addContact',{usuario_id:me.id,contacto_id:r.usuario.id});await api('addContact',{usuario_id:r.usuario.id,contacto_id:me.id}).catch(()=>{});await refresh();st($('modalStatus'),'Contacto agregado: '+(r.usuario.nombre||r.usuario.alias))}catch(e){st($('modalStatus'),e.message)}}async function invite(){let ph=$('contactPhone').value.trim();st($('modalStatus'),'Creando invitación...');try{let r=await api('createInvite',{creado_por:me.id,telefono_destino:ph}),b=$('inviteBox');b.style.display='block';b.innerHTML='<b>Invitación:</b><br>'+esc(r.invite_url||'')+'<br><br><b>WhatsApp:</b><br>'+esc(r.whatsapp_url||'');st($('modalStatus'),'Abrí WhatsApp para enviarla.');if(r.whatsapp_url)open(r.whatsapp_url,'_blank')}catch(e){st($('modalStatus'),e.message)}}$('tabL').onclick=()=>tab('l');$('tabR').onclick=()=>tab('r');$('btnLogin').onclick=login;$('btnRegister').onclick=reg;$('out').onclick=()=>{localStorage.removeItem(LS);me=null;contacts=[];chat=null;showAuth()};$('ref').onclick=()=>refresh().catch(e=>alert(e.message));$('add').onclick=()=>{$('modal').classList.add('on');$('contactPhone').focus();st($('modalStatus'),'');$('inviteBox').style.display='none'};$('close').onclick=()=>$('modal').classList.remove('on');$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('on')};$('find').onclick=find;$('invite').onclick=invite;$('send').onclick=send;$('back').onclick=()=>$('shell').classList.remove('open');$('text').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};$('loginPhone').value='543471355926';let u=load();if(u&&u.id){me=u;showApp();refresh().catch(()=>{})}else showAuth();if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))})();
-</script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#1676d2" />
+  <title>RetroChat v0.1.2</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root{
+      --xp-blue:#1476d4;
+      --xp-blue2:#4db2ff;
+      --xp-dark:#063f8d;
+      --xp-soft:#dff2ff;
+      --xp-cream:#fff8d9;
+      --border:#1a5fa8;
+      --text:#06264c;
+      --green:#22b14c;
+      --yellow:#ffd64a;
+      --red:#ef4444;
+      --shadow: 0 18px 45px rgba(0,35,80,.25);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,.85), transparent 28%),
+        linear-gradient(135deg,#68b9ff 0%,#dff4ff 42%,#fff7c2 100%);
+      overflow:hidden;
+    }
+    button,input,textarea,select{font:inherit}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .app{height:100%;display:grid;place-items:center;padding:12px}
+    .window{
+      width:min(1040px,100%);
+      height:min(720px,100%);
+      max-height:calc(100vh - 24px);
+      background:#eef8ff;
+      border:1px solid #0755a0;
+      border-radius:14px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+    .titlebar{
+      min-height:42px;
+      background:linear-gradient(#35a6ff,#0e65c6 50%,#084da2);
+      color:white;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 10px;
+      text-shadow:0 1px 1px #00336d;
+      border-bottom:1px solid #053e7d;
+    }
+    .orb{
+      width:26px;height:26px;border-radius:50%;
+      background:radial-gradient(circle at 30% 25%,#fff,#7bd5ff 32%,#0873d1 70%);
+      border:1px solid rgba(255,255,255,.75);
+      box-shadow: inset 0 -3px 8px rgba(0,0,0,.18);
+      flex:0 0 auto;
+    }
+    .titlebar strong{font-size:15px}
+    .titlebar small{opacity:.85;margin-left:auto}
+    .winbtns{display:flex;gap:5px;margin-left:8px}
+    .winbtn{
+      width:22px;height:22px;border-radius:5px;
+      border:1px solid rgba(255,255,255,.7);
+      background:linear-gradient(#fff,#90cfff);
+      color:#064a9b;
+      display:grid;place-items:center;font-weight:bold;font-size:12px;
+    }
+    .body{flex:1;overflow:hidden;display:flex;min-height:0}
+    .auth{width:100%;display:grid;place-items:center;padding:18px;overflow:auto}
+    .login-card{
+      width:min(450px,100%);
+      background:linear-gradient(#f7fdff,#d8f0ff);
+      border:1px solid #74aee0;
+      border-radius:22px;
+      box-shadow:0 12px 28px rgba(0,50,100,.2);
+      padding:24px;
+      position:relative;
+      overflow:hidden;
+    }
+    .login-card:before{
+      content:"";
+      position:absolute;left:-40px;right:-40px;top:-90px;height:170px;
+      background:radial-gradient(circle,#fff 0%,rgba(255,255,255,.65) 38%,rgba(255,255,255,0) 70%);
+      opacity:.85;
+    }
+    .brand{position:relative;text-align:center;margin-bottom:18px}
+    .avatar-big{
+      width:90px;height:90px;margin:0 auto 10px;border-radius:24px;
+      background:linear-gradient(135deg,#11a2ff,#005fb8);
+      border:3px solid white;
+      box-shadow:0 8px 20px rgba(0,63,141,.25), inset 0 2px 5px rgba(255,255,255,.5);
+      display:grid;place-items:center;color:white;font-size:42px;
+    }
+    .brand h1{margin:0;font-size:30px;color:#0b64bd;letter-spacing:-.5px}
+    .brand p{margin:4px 0 0;font-size:13px;color:#375f84}
+    .tabs{
+      display:flex;background:#c8e7ff;border:1px solid #8cbfe8;border-radius:12px;
+      padding:4px;gap:4px;margin-bottom:14px;
+    }
+    .tab{
+      flex:1;border:0;border-radius:9px;padding:9px;
+      background:transparent;color:#185083;cursor:pointer;font-weight:bold;
+    }
+    .tab.active{background:linear-gradient(#fff,#e8f7ff);box-shadow:0 1px 3px rgba(0,0,0,.13);color:#063f8d}
+    .field{margin:10px 0}
+    .field label{display:block;font-size:12px;font-weight:bold;margin-bottom:5px;color:#164a7f}
+    .hint{font-size:11px;color:#557;margin-top:4px;line-height:1.3}
+    .field input,.field select,.composer textarea{
+      width:100%;border:1px solid #7fb5dc;border-radius:10px;background:white;
+      padding:11px 12px;color:#0b2e55;outline:none;box-shadow:inset 0 1px 4px rgba(0,0,0,.11);
+    }
+    .field input:focus,.composer textarea:focus{
+      border-color:#0b75d1;box-shadow:0 0 0 3px rgba(19,118,210,.16), inset 0 1px 4px rgba(0,0,0,.11)
+    }
+    .primary{
+      width:100%;border:1px solid #be8a00;border-radius:12px;padding:12px 14px;
+      background:linear-gradient(#fff6ae,#ffc928 48%,#f1a900);
+      color:#4a3100;font-weight:bold;cursor:pointer;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 3px 8px rgba(116,75,0,.18);
+    }
+    .secondary{
+      border:1px solid #6aa3d5;border-radius:10px;padding:9px 12px;
+      background:linear-gradient(#fff,#d8efff);color:#0b4e8f;font-weight:bold;cursor:pointer;
+    }
+    .danger{border-color:#df8f8f;background:linear-gradient(#fff,#ffe1e1);color:#9b1c1c}
+    .status{margin-top:12px;min-height:19px;font-size:12px;color:#164a7f;text-align:center}
+    .shell{flex:1;min-height:0;display:none;width:100%}
+    .shell.active{display:flex}
+    .sidebar{
+      width:330px;min-width:280px;max-width:38%;
+      background:linear-gradient(#f8fdff,#cbeaff);
+      border-right:1px solid #72aedd;
+      display:flex;flex-direction:column;min-height:0;
+    }
+    .profile{
+      padding:14px;display:flex;gap:10px;align-items:center;
+      border-bottom:1px solid #9ac6e6;background:linear-gradient(#ffffffcc,#e5f6ffcc);
+    }
+    .mini-avatar{
+      width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#27cfff,#0b62c2);
+      border:2px solid white;box-shadow:0 3px 10px rgba(0,62,120,.2);
+      color:white;display:grid;place-items:center;font-size:20px;font-weight:bold;flex:0 0 auto;
+    }
+    .profile h2{font-size:15px;margin:0}
+    .profile p{font-size:12px;margin:3px 0 0;color:#4c6f8d}
+    .toolbar{padding:10px;display:flex;gap:8px;border-bottom:1px solid #9ac6e6;flex-wrap:wrap}
+    .toolbar .secondary{flex:1;font-size:12px;min-width:92px}
+    .contact-list{overflow:auto;padding:8px;flex:1}
+    .contact{
+      display:flex;align-items:center;gap:10px;padding:10px;border:1px solid transparent;
+      border-radius:12px;cursor:pointer;margin-bottom:6px;
+    }
+    .contact:hover,.contact.active{
+      background:#fff9d2;border-color:#e5bc47;box-shadow:0 2px 7px rgba(130,86,0,.1);
+    }
+    .dot{width:11px;height:11px;border-radius:50%;background:#aab;box-shadow:0 0 0 2px white}
+    .dot.en_linea{background:var(--green)}
+    .dot.ausente{background:var(--yellow)}
+    .dot.no_disponible{background:var(--red)}
+    .contact strong{display:block;font-size:13px}
+    .contact small{display:block;font-size:11px;color:#5f7488}
+    .chat{flex:1;min-width:0;display:flex;flex-direction:column;background:linear-gradient(#f9fdff,#e8f6ff)}
+    .chat-head{
+      padding:12px 14px;border-bottom:1px solid #9ac6e6;background:linear-gradient(#fff,#dff3ff);
+      display:flex;align-items:center;gap:10px;
+    }
+    .chat-head h3{margin:0;font-size:15px}
+    .chat-head p{margin:2px 0 0;font-size:12px;color:#557}
+    .messages{
+      flex:1;overflow:auto;padding:14px;
+      background:
+        linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)),
+        radial-gradient(circle at 10% 10%,#cceeff,transparent 26%),
+        radial-gradient(circle at 90% 90%,#fff3b3,transparent 24%);
+    }
+    .empty{height:100%;display:grid;place-items:center;text-align:center;color:#52708b;padding:22px}
+    .msg{
+      max-width:78%;margin:0 0 10px;padding:9px 11px;border-radius:14px;
+      border:1px solid #a7c9e4;background:white;box-shadow:0 2px 7px rgba(0,40,80,.08);word-wrap:break-word;
+    }
+    .msg.me{margin-left:auto;background:#fff7c5;border-color:#dfbd48}
+    .msg .who{font-size:11px;font-weight:bold;color:#0e5aaa;margin-bottom:4px}
+    .msg .txt{font-size:14px;white-space:pre-wrap;line-height:1.3}
+    .msg .time{font-size:10px;color:#667;text-align:right;margin-top:5px}
+    .composer{
+      display:flex;gap:8px;padding:10px;border-top:1px solid #9ac6e6;
+      background:linear-gradient(#fff,#dff3ff);align-items:flex-end;
+    }
+    .composer textarea{min-height:44px;max-height:110px;resize:none}
+    .composer .primary{width:auto;min-width:88px;height:44px}
+    .modal-wrap{
+      position:fixed;inset:0;background:rgba(0,18,45,.35);
+      display:none;place-items:center;padding:14px;z-index:10;
+    }
+    .modal-wrap.show{display:grid}
+    .modal{
+      width:min(440px,100%);background:#eef8ff;border:1px solid #0755a0;
+      border-radius:16px;overflow:hidden;box-shadow:var(--shadow);
+    }
+    .modal .titlebar{min-height:36px}
+    .modal-body{padding:16px}
+    .row{display:flex;gap:8px}
+    .row > *{flex:1}
+    .linkbox{
+      font-size:12px;background:white;border:1px dashed #7fb5dc;padding:8px;
+      border-radius:10px;word-break:break-all;margin-top:10px;
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:5px;font-size:11px;
+      padding:3px 7px;border-radius:999px;background:#ffffffaa;border:1px solid #9ac6e6;color:#164a7f;
+    }
+    @media(max-width:720px){
+      .app{padding:0}
+      .window{height:100%;max-height:none;border-radius:0;border:0}
+      .titlebar small{display:none}
+      .body{min-height:0}
+      .shell.active{display:block;position:relative}
+      .sidebar{width:100%;max-width:none;height:100%;display:flex}
+      .chat{position:absolute;inset:0;transform:translateX(100%);transition:.22s ease;z-index:3}
+      .shell.chat-open .chat{transform:translateX(0)}
+      .backbtn{display:inline-flex!important}
+      .msg{max-width:88%}
+      .login-card{border-radius:18px}
+    }
+    .backbtn{display:none}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="window">
+      <div class="titlebar">
+        <div class="orb"></div>
+        <strong>RetroChat</strong>
+        <small id="topVersion">v0.1.2 · Messenger vibes, moderno por dentro</small>
+        <div class="winbtns"><div class="winbtn">_</div><div class="winbtn">□</div><div class="winbtn">×</div></div>
+      </div>
+
+      <div class="body">
+        <section id="auth" class="auth">
+          <div class="login-card">
+            <div class="brand">
+              <div class="avatar-big">💬</div>
+              <h1>RetroChat</h1>
+              <p>Conectado como en 2004, funcionando como en 2026.</p>
+            </div>
+
+            <div class="tabs">
+              <button id="tabLogin" class="tab active" type="button">Iniciar sesión</button>
+              <button id="tabRegister" class="tab" type="button">Crear cuenta</button>
+            </div>
+
+            <div id="loginForm">
+              <div class="field">
+                <label>Celular o usuario</label>
+                <input id="loginId" autocomplete="username" placeholder="543471... o tincho" />
+                <div class="hint">Podés entrar con celular o con usuario web.</div>
+              </div>
+              <div class="field">
+                <label>PIN</label>
+                <input id="loginPin" type="password" inputmode="numeric" placeholder="••••" />
+              </div>
+              <button id="btnLogin" class="primary" type="button">Iniciar sesión</button>
+            </div>
+
+            <div id="registerForm" style="display:none">
+              <div class="field">
+                <label>Nombre visible</label>
+                <input id="regName" autocomplete="name" placeholder="Tincho Siara" />
+              </div>
+              <div class="field">
+                <label>Usuario</label>
+                <input id="regUser" autocomplete="username" placeholder="tincho" />
+                <div class="hint">Para usuarios web sin celular. Se normaliza sin @, en minúsculas.</div>
+              </div>
+              <div class="field">
+                <label>Celular <span style="font-weight:normal">(opcional)</span></label>
+                <input id="regPhone" inputmode="numeric" autocomplete="tel" placeholder="543471..." />
+                <div class="hint">Necesario solo si querés que te agreguen por número o invitar por WhatsApp.</div>
+              </div>
+              <div class="field">
+                <label>PIN</label>
+                <input id="regPin" type="password" inputmode="numeric" placeholder="mínimo 4 números" />
+              </div>
+              <button id="btnRegister" class="primary" type="button">Crear cuenta</button>
+            </div>
+
+            <div id="authStatus" class="status"></div>
+          </div>
+        </section>
+
+        <section id="shell" class="shell">
+          <aside class="sidebar">
+            <div class="profile">
+              <div class="mini-avatar" id="meAvatar">T</div>
+              <div style="min-width:0">
+                <h2 id="meName">Usuario</h2>
+                <p>
+                  <span class="dot en_linea" style="display:inline-block;vertical-align:-1px"></span>
+                  En línea · <span id="meHandle"></span>
+                </p>
+              </div>
+            </div>
+            <div class="toolbar">
+              <button id="btnAddContact" class="secondary" type="button">Agregar</button>
+              <button id="btnRefresh" class="secondary" type="button">Actualizar</button>
+              <button id="btnLogout" class="secondary danger" type="button">Salir</button>
+            </div>
+            <div id="contactList" class="contact-list"></div>
+          </aside>
+
+          <main class="chat">
+            <div class="chat-head">
+              <button id="btnBack" class="secondary backbtn" type="button">←</button>
+              <div class="mini-avatar" id="chatAvatar">?</div>
+              <div>
+                <h3 id="chatTitle">Elegí un contacto</h3>
+                <p id="chatSub">Los mensajes se guardan en tu Sheet RetroChat.</p>
+              </div>
+              <div style="margin-left:auto"><span id="chatSeq" class="pill">seq: —</span></div>
+            </div>
+            <div id="messages" class="messages">
+              <div class="empty">
+                <div>
+                  <h2>Bienvenido a RetroChat</h2>
+                  <p>Agregá un contacto por celular o usuario para empezar a charlar.</p>
+                </div>
+              </div>
+            </div>
+            <div class="composer">
+              <textarea id="msgText" placeholder="Escribí un mensaje..." disabled></textarea>
+              <button id="btnSend" class="primary" type="button" disabled>Enviar</button>
+            </div>
+          </main>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalWrap" class="modal-wrap">
+    <div class="modal">
+      <div class="titlebar">
+        <div class="orb"></div>
+        <strong id="modalTitle">Agregar contacto</strong>
+        <div class="winbtns"><button id="btnCloseModal" class="winbtn" type="button">×</button></div>
+      </div>
+      <div class="modal-body">
+        <div class="tabs" style="margin-bottom:10px">
+          <button id="tabFindPhone" class="tab active" type="button">Por celular</button>
+          <button id="tabFindUser" class="tab" type="button">Por usuario</button>
+        </div>
+
+        <div id="findPhoneBox">
+          <div class="field">
+            <label>Celular del contacto</label>
+            <input id="contactPhone" inputmode="numeric" placeholder="543471..." />
+          </div>
+          <div class="row">
+            <button id="btnFindPhone" class="primary" type="button">Buscar</button>
+            <button id="btnInvite" class="secondary" type="button">Invitar WhatsApp</button>
+          </div>
+        </div>
+
+        <div id="findUserBox" style="display:none">
+          <div class="field">
+            <label>Usuario del contacto</label>
+            <input id="contactUser" placeholder="adminweb" />
+          </div>
+          <button id="btnFindUser" class="primary" type="button">Buscar usuario</button>
+        </div>
+
+        <div id="modalStatus" class="status"></div>
+        <div id="inviteBox" class="linkbox" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
+  const APP_VERSION = '0.1.2';
+  const LS_USER = 'retrochat_user_v012';
+  const LS_INVITE = 'retrochat_invite_v012';
+  const LS_LASTSEQ = 'retrochat_lastseq_v012';
+
+  const $ = (id) => document.getElementById(id);
+
+  let me = null;
+  let contacts = [];
+  let activeContact = null;
+  let activeChat = null;
+  let messagesByChat = {};
+  let lastSeqByChat = loadJson(LS_LASTSEQ, {});
+  let pollTimer = null;
+  let heartbeatTimer = null;
+  let findMode = 'phone';
+
+  const qs = new URLSearchParams(location.search);
+  const inviteFromUrl = qs.get('invite') || '';
+  if (inviteFromUrl) localStorage.setItem(LS_INVITE, inviteFromUrl);
+
+  function setStatus(el, msg){ el.textContent = msg || ''; }
+
+  function initials(name){
+    return String(name || '?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || '?';
+  }
+
+  function loadJson(key, fallback){
+    try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
+    catch { return fallback; }
+  }
+
+  function saveJson(key, value){
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function encodeData(data){
+    const p = new URLSearchParams();
+    Object.entries(data || {}).forEach(([k,v]) => p.set(k, v == null ? '' : String(v)));
+    return p.toString();
+  }
+
+  async function api(action, data = {}){
+    const url = API + '?action=' + encodeURIComponent(action) + '&' + encodeData(data);
+    const res = await fetch(url, { method:'GET', cache:'no-store', redirect:'follow' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'Error desconocido');
+    return json;
+  }
+
+  function saveSession(user){ localStorage.setItem(LS_USER, JSON.stringify(user)); }
+  function loadSession(){ return loadJson(LS_USER, null); }
+  function clearSession(){ localStorage.removeItem(LS_USER); }
+
+  function showAuth(){
+    $('auth').style.display = 'grid';
+    $('shell').classList.remove('active');
+    stopPolling();
+    stopHeartbeat();
+  }
+
+  function showApp(){
+    $('auth').style.display = 'none';
+    $('shell').classList.add('active');
+    $('meName').textContent = me.nombre || me.alias || me.usuario || 'Usuario';
+    $('meAvatar').textContent = initials(me.nombre || me.alias || me.usuario);
+    $('meHandle').textContent = me.usuario ? '@' + me.usuario : (me.telefono || 'sin usuario');
+    renderContacts();
+    startHeartbeat();
+  }
+
+  function renderContacts(){
+    const box = $('contactList');
+    box.innerHTML = '';
+    if (!contacts.length){
+      box.innerHTML = '<div class="empty" style="height:auto;padding:18px"><div><b>Sin contactos todavía</b><p>Usá “Agregar” para buscar por celular/usuario o invitar por WhatsApp.</p></div></div>';
+      return;
+    }
+    contacts.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'contact' + (activeContact && activeContact.id === c.id ? ' active' : '');
+      const subtitle = c.usuario ? '@' + c.usuario : (c.telefono || 'Disponible');
+      div.innerHTML = `
+        <div class="dot ${c.estado || 'en_linea'}"></div>
+        <div class="mini-avatar">${initials(c.nombre || c.alias || c.usuario)}</div>
+        <div style="min-width:0">
+          <strong>${escapeHtml(c.nombre || c.alias || c.usuario || 'Contacto')}</strong>
+          <small>${escapeHtml(c.frase || subtitle)}</small>
+        </div>`;
+      div.addEventListener('click', () => openContact(c));
+      box.appendChild(div);
+    });
+  }
+
+  async function refreshContacts(){
+    if (!me) return;
+    const r = await api('getContacts', { usuario_id: me.id });
+    contacts = r.contactos || [];
+    renderContacts();
+  }
+
+  async function openContact(c){
+    activeContact = c;
+    renderContacts();
+    $('chatTitle').textContent = c.nombre || c.alias || c.usuario || 'Contacto';
+    $('chatSub').textContent = c.usuario ? '@' + c.usuario : (c.telefono ? 'Celular: ' + c.telefono : 'Chat directo');
+    $('chatAvatar').textContent = initials(c.nombre || c.alias || c.usuario);
+    $('msgText').disabled = false;
+    $('btnSend').disabled = false;
+    $('shell').classList.add('chat-open');
+
+    const r = await api('createOrGetDirectChat', { usuario_id: me.id, contacto_id: c.id });
+    activeChat = r.chat;
+
+    const chatId = activeChat.chat_id;
+    if (!messagesByChat[chatId]) messagesByChat[chatId] = [];
+
+    // Primera carga: pedimos últimos 100. Luego incremental con since_seq.
+    if (!lastSeqByChat[chatId]) {
+      await loadMessages({ full:true });
+    } else {
+      renderMessages(messagesByChat[chatId] || []);
+      await loadMessages({ full:false });
+    }
+
+    startPolling();
+  }
+
+  async function loadMessages(opts = {}){
+    if (!activeChat) return;
+
+    const chatId = activeChat.chat_id;
+    const sinceSeq = opts.full ? 0 : Number(lastSeqByChat[chatId] || 0);
+
+    const r = await api('getMessages', {
+      chat_id: chatId,
+      usuario_id: me.id,
+      since_seq: sinceSeq,
+      limit: opts.full ? 100 : 50
+    });
+
+    const incoming = r.mensajes || [];
+
+    if (opts.full) {
+      messagesByChat[chatId] = incoming;
+    } else if (incoming.length) {
+      const existing = messagesByChat[chatId] || [];
+      const seen = new Set(existing.map(m => m.id));
+      incoming.forEach(m => { if (!seen.has(m.id)) existing.push(m); });
+      existing.sort((a,b) => Number(a.seq || 0) - Number(b.seq || 0));
+      messagesByChat[chatId] = existing.slice(-150);
+    }
+
+    const lastSeqFromMessages = (messagesByChat[chatId] || []).reduce((max,m) => {
+      const seq = Number(m.seq || 0);
+      return seq > max ? seq : max;
+    }, 0);
+
+    const nextLastSeq = Math.max(lastSeqFromMessages, Number(r.last_seq || 0), sinceSeq);
+    lastSeqByChat[chatId] = nextLastSeq;
+    saveJson(LS_LASTSEQ, lastSeqByChat);
+
+    $('chatSeq').textContent = 'seq: ' + nextLastSeq;
+    renderMessages(messagesByChat[chatId] || []);
+  }
+
+  function renderMessages(msgs){
+    const box = $('messages');
+    if (!msgs.length){
+      box.innerHTML = '<div class="empty"><div><h2>Sin mensajes</h2><p>Mandá el primero. Que sea histórico, tampoco “hola” seco.</p></div></div>';
+      return;
+    }
+    box.innerHTML = '';
+    msgs.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'msg' + (m.usuario_id === me.id ? ' me' : '');
+      div.innerHTML = `
+        <div class="who">${escapeHtml(m.usuario_nombre || 'Usuario')} dice:</div>
+        <div class="txt">${escapeHtml(m.texto || '')}</div>
+        <div class="time">#${escapeHtml(m.seq || '')} · ${escapeHtml(m.fecha || '')}</div>`;
+      box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async function sendMessage(){
+    const txt = $('msgText').value.trim();
+    if (!txt || !activeChat) return;
+    $('btnSend').disabled = true;
+    try{
+      const r = await api('sendMessage', { chat_id: activeChat.chat_id, usuario_id: me.id, texto: txt });
+      $('msgText').value = '';
+
+      const chatId = activeChat.chat_id;
+      const msg = r.mensaje;
+      if (msg && msg.id) {
+        if (!messagesByChat[chatId]) messagesByChat[chatId] = [];
+        messagesByChat[chatId].push(msg);
+        messagesByChat[chatId].sort((a,b) => Number(a.seq || 0) - Number(b.seq || 0));
+        lastSeqByChat[chatId] = Math.max(Number(lastSeqByChat[chatId] || 0), Number(msg.seq || 0));
+        saveJson(LS_LASTSEQ, lastSeqByChat);
+        renderMessages(messagesByChat[chatId]);
+        $('chatSeq').textContent = 'seq: ' + lastSeqByChat[chatId];
+      }
+
+      await loadMessages({ full:false });
+    }catch(err){
+      alert('No se pudo enviar: ' + err.message);
+    }finally{
+      $('btnSend').disabled = false;
+      $('msgText').focus();
+    }
+  }
+
+  function startPolling(){
+    stopPolling();
+    pollTimer = setInterval(() => loadMessages({ full:false }).catch(()=>{}), 5000);
+  }
+  function stopPolling(){
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = null;
+  }
+
+  function startHeartbeat(){
+    stopHeartbeat();
+    if (!me || !me.id) return;
+    api('heartbeat', { usuario_id: me.id }).catch(()=>{});
+    heartbeatTimer = setInterval(() => {
+      api('heartbeat', { usuario_id: me.id }).catch(()=>{});
+    }, 60000);
+  }
+  function stopHeartbeat(){
+    if (heartbeatTimer) clearInterval(heartbeatTimer);
+    heartbeatTimer = null;
+  }
+
+  function escapeHtml(s){
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[c]));
+  }
+
+  function switchTab(which){
+    const login = which === 'login';
+    $('tabLogin').classList.toggle('active', login);
+    $('tabRegister').classList.toggle('active', !login);
+    $('loginForm').style.display = login ? 'block' : 'none';
+    $('registerForm').style.display = login ? 'none' : 'block';
+    setStatus($('authStatus'), '');
+  }
+
+  async function doLogin(){
+    setStatus($('authStatus'), 'Conectando...');
+    try{
+      const loginValue = $('loginId').value.trim();
+      const r = await api('login', { login: loginValue, pin:$('loginPin').value.trim() });
+      me = r.usuario;
+      contacts = r.contactos || [];
+      saveSession(me);
+      setStatus($('authStatus'), '');
+      showApp();
+    }catch(err){
+      setStatus($('authStatus'), err.message);
+    }
+  }
+
+  async function doRegister(){
+    setStatus($('authStatus'), 'Creando cuenta...');
+    try{
+      const inviteCode = localStorage.getItem(LS_INVITE) || '';
+      const r = await api('registerUser', {
+        nombre:$('regName').value.trim(),
+        usuario:$('regUser').value.trim(),
+        telefono:$('regPhone').value.trim(),
+        pin:$('regPin').value.trim(),
+        invite_code: inviteCode
+      });
+      localStorage.removeItem(LS_INVITE);
+      me = r.usuario;
+      saveSession(me);
+      contacts = [];
+      setStatus($('authStatus'), '');
+      showApp();
+      await refreshContacts().catch(()=>{});
+    }catch(err){
+      setStatus($('authStatus'), err.message);
+    }
+  }
+
+  function openModal(){
+    $('modalWrap').classList.add('show');
+    $('modalStatus').textContent = '';
+    $('inviteBox').style.display = 'none';
+    $('inviteBox').textContent = '';
+    setFindMode('phone');
+    setTimeout(() => $('contactPhone').focus(), 50);
+  }
+
+  function closeModal(){ $('modalWrap').classList.remove('show'); }
+
+  function setFindMode(mode){
+    findMode = mode;
+    const phone = mode === 'phone';
+    $('tabFindPhone').classList.toggle('active', phone);
+    $('tabFindUser').classList.toggle('active', !phone);
+    $('findPhoneBox').style.display = phone ? 'block' : 'none';
+    $('findUserBox').style.display = phone ? 'none' : 'block';
+    $('modalStatus').textContent = '';
+    $('inviteBox').style.display = 'none';
+  }
+
+  async function addFoundUser(foundUser){
+    if (foundUser.id === me.id){
+      setStatus($('modalStatus'), 'Ese sos vos, campeón. No hace falta agregarte.');
+      return;
+    }
+
+    await api('addContact', { usuario_id: me.id, contacto_id: foundUser.id });
+    await api('addContact', { usuario_id: foundUser.id, contacto_id: me.id }).catch(()=>{});
+    await refreshContacts();
+
+    setStatus($('modalStatus'), 'Contacto agregado: ' + (foundUser.nombre || foundUser.alias || foundUser.usuario));
+  }
+
+  async function findContactByPhone(){
+    const phone = $('contactPhone').value.trim();
+    setStatus($('modalStatus'), 'Buscando...');
+    $('inviteBox').style.display = 'none';
+    try{
+      const r = await api('findUserByPhone', { telefono: phone });
+      if (!r.found){
+        setStatus($('modalStatus'), 'No está registrado. Podés invitarlo por WhatsApp.');
+        return;
+      }
+      await addFoundUser(r.usuario);
+    }catch(err){
+      setStatus($('modalStatus'), err.message);
+    }
+  }
+
+  async function findContactByUser(){
+    const user = $('contactUser').value.trim();
+    setStatus($('modalStatus'), 'Buscando usuario...');
+    $('inviteBox').style.display = 'none';
+    try{
+      const r = await api('findUserByHandle', { usuario: user });
+      if (!r.found){
+        setStatus($('modalStatus'), 'No encontré ese usuario.');
+        return;
+      }
+      await addFoundUser(r.usuario);
+    }catch(err){
+      setStatus($('modalStatus'), err.message);
+    }
+  }
+
+  async function inviteWhatsApp(){
+    const phone = $('contactPhone').value.trim();
+    setStatus($('modalStatus'), 'Creando invitación...');
+    try{
+      const r = await api('createInvite', { creado_por: me.id, telefono_destino: phone });
+      const box = $('inviteBox');
+      box.style.display = 'block';
+      box.innerHTML = '<b>Invitación lista:</b><br>' + escapeHtml(r.invite_url || '') + '<br><br><b>WhatsApp:</b><br>' + escapeHtml(r.whatsapp_url || '');
+      setStatus($('modalStatus'), 'Abrí WhatsApp para enviar la invitación.');
+      if (r.whatsapp_url) window.open(r.whatsapp_url, '_blank');
+    }catch(err){
+      setStatus($('modalStatus'), err.message);
+    }
+  }
+
+  $('tabLogin').addEventListener('click', () => switchTab('login'));
+  $('tabRegister').addEventListener('click', () => switchTab('register'));
+  $('btnLogin').addEventListener('click', doLogin);
+  $('btnRegister').addEventListener('click', doRegister);
+  $('loginPin').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+  $('regPin').addEventListener('keydown', e => { if(e.key === 'Enter') doRegister(); });
+
+  $('btnLogout').addEventListener('click', () => {
+    clearSession();
+    me=null; contacts=[]; activeChat=null; activeContact=null;
+    showAuth();
+  });
+  $('btnRefresh').addEventListener('click', () => refreshContacts().catch(err => alert(err.message)));
+  $('btnAddContact').addEventListener('click', openModal);
+  $('btnCloseModal').addEventListener('click', closeModal);
+  $('modalWrap').addEventListener('click', (e) => { if (e.target === $('modalWrap')) closeModal(); });
+  $('tabFindPhone').addEventListener('click', () => setFindMode('phone'));
+  $('tabFindUser').addEventListener('click', () => setFindMode('user'));
+  $('btnFindPhone').addEventListener('click', findContactByPhone);
+  $('btnFindUser').addEventListener('click', findContactByUser);
+  $('btnInvite').addEventListener('click', inviteWhatsApp);
+  $('btnSend').addEventListener('click', sendMessage);
+  $('btnBack').addEventListener('click', () => $('shell').classList.remove('chat-open'));
+  $('msgText').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+  });
+
+  const cached = loadSession();
+  if (cached && cached.id){
+    me = cached;
+    showApp();
+    refreshContacts().catch(() => {});
+  } else {
+    showAuth();
+  }
+
+  if ('serviceWorker' in navigator){
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  }
+})();
+</script>
+</body>
+</html>
