@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.1.2</title>
+  <title>RetroChat v0.1.3</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -219,10 +219,57 @@
       display:inline-flex;align-items:center;gap:5px;font-size:11px;
       padding:3px 7px;border-radius:999px;background:#ffffffaa;border:1px solid #9ac6e6;color:#164a7f;
     }
+
+    .header-actions{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      margin-left:8px;
+    }
+    .headbtn{
+      min-width:34px;
+      height:28px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.7);
+      background:linear-gradient(#ffffff,#b9e3ff 48%,#72bfff);
+      color:#064a9b;
+      font-size:12px;
+      font-weight:bold;
+      cursor:pointer;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 1px 3px rgba(0,0,0,.18);
+      text-shadow:none;
+      padding:0 9px;
+    }
+    .headbtn:active{transform:translateY(1px)}
+    .support-grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+      font-size:13px;
+    }
+    .support-row{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:8px 10px;
+      border:1px solid #9ac6e6;
+      border-radius:10px;
+      background:#fff;
+    }
+    .support-row b{color:#164a7f}
+    .support-actions{
+      display:flex;
+      gap:8px;
+      margin-top:12px;
+    }
+    .support-actions button{flex:1}
+
     @media(max-width:720px){
       .app{padding:0}
       .window{height:100%;max-height:none;border-radius:0;border:0}
       .titlebar small{display:none}
+      .header-actions{margin-left:auto}
+      .headbtn{min-width:32px;padding:0 8px}
       .body{min-height:0}
       .shell.active{display:block;position:relative}
       .sidebar{width:100%;max-width:none;height:100%;display:flex}
@@ -241,7 +288,11 @@
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.1.2 · Messenger vibes, moderno por dentro</small>
+        <small id="topVersion">v0.1.3 · Messenger vibes, moderno por dentro</small>
+        <div class="header-actions">
+          <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
+          <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
+        </div>
         <div class="winbtns"><div class="winbtn">_</div><div class="winbtn">□</div><div class="winbtn">×</div></div>
       </div>
 
@@ -384,13 +435,39 @@
     </div>
   </div>
 
+  <div id="supportWrap" class="modal-wrap">
+    <div class="modal">
+      <div class="titlebar">
+        <div class="orb"></div>
+        <strong>Soporte RetroChat</strong>
+        <div class="winbtns"><button id="btnCloseSupport" class="winbtn" type="button">×</button></div>
+      </div>
+      <div class="modal-body">
+        <div class="support-grid">
+          <div class="support-row"><b>App</b><span>RetroChat</span></div>
+          <div class="support-row"><b>Frontend</b><span id="supportFront">v0.1.3</span></div>
+          <div class="support-row"><b>Backend</b><span id="supportBack">consultando...</span></div>
+          <div class="support-row"><b>Usuario</b><span id="supportUser">—</span></div>
+          <div class="support-row"><b>Chat activo</b><span id="supportChat">—</span></div>
+          <div class="support-row"><b>Último seq</b><span id="supportSeq">—</span></div>
+          <div class="support-row"><b>Cache</b><span>retrochat-v0-1-3</span></div>
+        </div>
+        <div id="supportStatus" class="status"></div>
+        <div class="support-actions">
+          <button id="btnSupportRefresh" class="primary" type="button">Actualizar datos</button>
+          <button id="btnForceReload" class="secondary danger" type="button">Forzar recarga</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.1.2';
-  const LS_USER = 'retrochat_user_v012';
-  const LS_INVITE = 'retrochat_invite_v012';
-  const LS_LASTSEQ = 'retrochat_lastseq_v012';
+  const APP_VERSION = '0.1.3';
+  const LS_USER = 'retrochat_user_v013';
+  const LS_INVITE = 'retrochat_invite_v013';
+  const LS_LASTSEQ = 'retrochat_lastseq_v013';
 
   const $ = (id) => document.getElementById(id);
 
@@ -758,6 +835,86 @@
       setStatus($('modalStatus'), err.message);
     }
   }
+
+
+  async function refreshAppData(showFeedback = true){
+    const oldTitle = $('btnHeaderRefresh') ? $('btnHeaderRefresh').textContent : '';
+    try{
+      if ($('btnHeaderRefresh')) {
+        $('btnHeaderRefresh').textContent = '…';
+        $('btnHeaderRefresh').disabled = true;
+      }
+
+      if (me && me.id) {
+        await refreshContacts().catch(()=>{});
+        await api('heartbeat', { usuario_id: me.id }).catch(()=>{});
+
+        if (activeChat) {
+          // Recarga completa del chat activo para evitar estados viejos.
+          await loadMessages({ full:true }).catch(()=>{});
+        }
+      }
+
+      if (showFeedback && $('supportStatus')) {
+        $('supportStatus').textContent = 'Datos actualizados.';
+      }
+    } finally {
+      if ($('btnHeaderRefresh')) {
+        $('btnHeaderRefresh').textContent = oldTitle || '↻';
+        $('btnHeaderRefresh').disabled = false;
+      }
+    }
+  }
+
+  async function openSupport(){
+    $('supportWrap').classList.add('show');
+
+    $('supportFront').textContent = 'v' + APP_VERSION;
+    $('supportUser').textContent = me ? ((me.nombre || me.usuario || me.id) + (me.usuario ? ' (@' + me.usuario + ')' : '')) : 'sin sesión';
+    $('supportChat').textContent = activeChat ? activeChat.chat_id : 'sin chat activo';
+    $('supportSeq').textContent = activeChat ? String(lastSeqByChat[activeChat.chat_id] || 0) : '—';
+    $('supportStatus').textContent = '';
+
+    try{
+      const r = await api('ping', {});
+      $('supportBack').textContent = 'v' + (r.version || '?') + ' · ' + (r.status || 'online');
+    }catch(err){
+      $('supportBack').textContent = 'error';
+      $('supportStatus').textContent = 'No pude consultar backend: ' + err.message;
+    }
+  }
+
+  function closeSupport(){
+    $('supportWrap').classList.remove('show');
+  }
+
+  async function forceReloadApp(){
+    $('supportStatus').textContent = 'Limpiando caché y recargando...';
+
+    try{
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.filter(k => k.includes('retrochat')).map(k => caches.delete(k)));
+      }
+    }catch(err){}
+
+    const cleanUrl = location.origin + location.pathname + '?v=' + Date.now();
+    location.replace(cleanUrl);
+  }
+
+
+
+  $('btnHeaderRefresh').addEventListener('click', () => refreshAppData(false).catch(err => alert('No pude actualizar: ' + err.message)));
+  $('btnSupport').addEventListener('click', openSupport);
+  $('btnCloseSupport').addEventListener('click', closeSupport);
+  $('supportWrap').addEventListener('click', (e) => { if (e.target === $('supportWrap')) closeSupport(); });
+  $('btnSupportRefresh').addEventListener('click', () => refreshAppData(true).catch(err => $('supportStatus').textContent = err.message));
+  $('btnForceReload').addEventListener('click', forceReloadApp);
 
   $('tabLogin').addEventListener('click', () => switchTab('login'));
   $('tabRegister').addEventListener('click', () => switchTab('register'));
