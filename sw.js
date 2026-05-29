@@ -1,4 +1,4 @@
-const CACHE = 'retrochat-v0-1-3';
+const CACHE = 'retrochat-v0-1-4';
 const ASSETS = ['./','./index.html','./manifest.json','./icon.svg'];
 
 self.addEventListener('install', e => {
