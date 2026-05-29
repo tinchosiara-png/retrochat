@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.1.4</title>
+  <title>RetroChat v0.1.5</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -288,7 +288,7 @@
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.1.4 · Messenger vibes, moderno por dentro</small>
+        <small id="topVersion">v0.1.5 · Messenger vibes, moderno por dentro</small>
         <div class="header-actions">
           <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
           <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
@@ -451,7 +451,7 @@
           <div class="support-row"><b>Chat activo</b><span id="supportChat">—</span></div>
           <div class="support-row"><b>Último seq</b><span id="supportSeq">—</span></div>
           <div class="support-row"><b>Última lectura</b><span id="supportLastPoll">—</span></div>
-          <div class="support-row"><b>Cache</b><span>retrochat-v0-1-4</span></div>
+          <div class="support-row"><b>Cache</b><span>retrochat-v0-1-5</span></div>
         </div>
         <div id="supportStatus" class="status"></div>
         <div class="support-actions">
@@ -465,10 +465,10 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.1.4';
-  const LS_USER = 'retrochat_user_v014';
-  const LS_INVITE = 'retrochat_invite_v014';
-  const LS_LASTSEQ = 'retrochat_lastseq_v014';
+  const APP_VERSION = '0.1.5';
+  const LS_USER = 'retrochat_user_v015';
+  const LS_INVITE = 'retrochat_invite_v015';
+  const LS_LASTSEQ = 'retrochat_lastseq_v015';
 
   const $ = (id) => document.getElementById(id);
 
@@ -589,13 +589,10 @@
     const chatId = activeChat.chat_id;
     if (!messagesByChat[chatId]) messagesByChat[chatId] = [];
 
-    // Primera carga: pedimos últimos 100. Luego incremental con since_seq.
-    if (!lastSeqByChat[chatId]) {
-      await loadMessages({ full:true });
-    } else {
-      renderMessages(messagesByChat[chatId] || []);
-      await loadMessages({ full:false });
-    }
+    // Siempre que se abre un chat hacemos una carga completa de los últimos 100.
+    // Motivo: last_seq vive en localStorage, pero los mensajes no se persisten completos.
+    // Si usáramos solo incremental al abrir, podríamos saltearnos mensajes recibidos mientras la app dormía.
+    await loadMessages({ full:true });
 
     startPolling();
   }
@@ -631,7 +628,14 @@
       return seq > max ? seq : max;
     }, 0);
 
-    const nextLastSeq = Math.max(lastSeqFromMessages, Number(r.last_seq || 0), sinceSeq);
+    // Importante:
+    // En respuestas incrementales vacías NO avanzamos usando r.last_seq.
+    // El backend devuelve chat.ultimo_seq aunque no mande filas, y eso podía hacer
+    // que el cliente "crea" que ya leyó mensajes que nunca descargó.
+    const nextLastSeq = opts.full || incoming.length
+      ? Math.max(lastSeqFromMessages, Number(r.last_seq || 0), sinceSeq)
+      : sinceSeq;
+
     lastSeqByChat[chatId] = nextLastSeq;
     saveJson(LS_LASTSEQ, lastSeqByChat);
 
@@ -720,7 +724,7 @@
 
     try{
       if (activeChat) {
-        await loadMessages({ full:false });
+        await loadMessages({ full:true });
         startPolling();
       } else {
         await refreshContacts().catch(()=>{});
