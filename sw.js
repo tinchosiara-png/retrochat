@@ -1,4 +1,4 @@
-const CACHE = 'retrochat-v0-1-10';
+const CACHE = 'retrochat-v0-1-11';
 const ASSETS = ['./','./index.html','./manifest.json','./icon.svg'];
 
 self.addEventListener('install', e => {
@@ -19,10 +19,7 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-
-  // No cachear Apps Script.
   if (url.origin.includes('script.google.com') || url.origin.includes('script.googleusercontent.com')) return;
-
   e.respondWith(
     caches.match(e.request).then(r => r || fetch(e.request))
   );

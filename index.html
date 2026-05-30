@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.1.10</title>
+  <title>RetroChat v0.1.11</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -160,7 +160,6 @@
       display:flex;align-items:center;gap:10px;padding:10px;border:1px solid transparent;
       border-radius:12px;cursor:pointer;margin-bottom:6px;
     }
-
     .contact.has-unread{
       background:#fff3b0;
       border-color:#e0aa1f;
@@ -180,7 +179,6 @@
       font-weight:bold;
       box-shadow:0 2px 6px rgba(120,0,30,.25);
     }
-
     .contact:hover,.contact.active{
       background:#fff9d2;border-color:#e5bc47;box-shadow:0 2px 7px rgba(130,86,0,.1);
     }
@@ -220,6 +218,51 @@
     }
     .composer textarea{min-height:44px;max-height:110px;resize:none}
     .composer .primary{width:auto;min-width:88px;height:44px}
+
+    /* Botón nudge */
+    .btn-nudge{
+      width:44px;height:44px;border-radius:10px;flex:0 0 auto;
+      border:1px solid #9ac6e6;
+      background:linear-gradient(#fff,#dff3ff);
+      font-size:20px;cursor:pointer;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+      display:grid;place-items:center;
+      transition:transform .08s;
+    }
+    .btn-nudge:active{transform:scale(.92)}
+    .btn-nudge:disabled{opacity:.4}
+
+    /* Animación nudge en el chat abierto */
+    @keyframes nudgeShake {
+      0%  { transform: translate(0,0) rotate(0deg); }
+      10% { transform: translate(-6px,-4px) rotate(-2deg); }
+      20% { transform: translate(6px,4px) rotate(2deg); }
+      30% { transform: translate(-8px,2px) rotate(-1deg); }
+      40% { transform: translate(8px,-2px) rotate(1deg); }
+      50% { transform: translate(-5px,5px) rotate(-2deg); }
+      60% { transform: translate(5px,-5px) rotate(2deg); }
+      70% { transform: translate(-4px,3px) rotate(-1deg); }
+      80% { transform: translate(4px,-3px) rotate(1deg); }
+      90% { transform: translate(-2px,2px) rotate(0deg); }
+      100%{ transform: translate(0,0) rotate(0deg); }
+    }
+    .window.nudging{
+      animation: nudgeShake .6s ease;
+    }
+
+    /* Mensaje de sistema nudge */
+    .msg-nudge{
+      text-align:center;
+      font-size:12px;
+      color:#7a5500;
+      background:#fff6cc;
+      border:1px dashed #e0aa1f;
+      border-radius:10px;
+      padding:6px 12px;
+      margin:4px auto 10px;
+      max-width:320px;
+    }
+
     .modal-wrap{
       position:fixed;inset:0;background:rgba(0,18,45,.35);
       display:none;place-items:center;padding:14px;z-index:10;
@@ -241,7 +284,6 @@
       display:inline-flex;align-items:center;gap:5px;font-size:11px;
       padding:3px 7px;border-radius:999px;background:#ffffffaa;border:1px solid #9ac6e6;color:#164a7f;
     }
-
     .header-actions{
       display:flex;
       align-items:center;
@@ -306,11 +348,11 @@
 </head>
 <body>
   <div class="app">
-    <div class="window">
+    <div class="window" id="mainWindow">
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.1.10 · Messenger vibes, moderno por dentro</small>
+        <small id="topVersion">v0.1.11 · Messenger vibes, moderno por dentro</small>
         <div class="header-actions">
           <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
           <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
@@ -353,12 +395,12 @@
               <div class="field">
                 <label>Usuario</label>
                 <input id="regUser" autocomplete="username" placeholder="tincho" />
-                <div class="hint">Para usuarios web sin celular. Se normaliza sin @, en minúsculas.</div>
+                <div class="hint">Se normaliza sin @, en minúsculas.</div>
               </div>
               <div class="field">
                 <label>Celular <span style="font-weight:normal">(opcional)</span></label>
                 <input id="regPhone" inputmode="numeric" autocomplete="tel" placeholder="543471..." />
-                <div class="hint">Necesario solo si querés que te agreguen por número o invitar por WhatsApp.</div>
+                <div class="hint">Solo si querés que te agreguen por número o invitar por WhatsApp.</div>
               </div>
               <div class="field">
                 <label>PIN</label>
@@ -411,6 +453,7 @@
             </div>
             <div class="composer">
               <textarea id="msgText" placeholder="Escribí un mensaje..." disabled></textarea>
+              <button id="btnNudge" class="btn-nudge" type="button" title="Nudge!" disabled>👋</button>
               <button id="btnSend" class="primary" type="button" disabled>Enviar</button>
             </div>
           </main>
@@ -467,14 +510,14 @@
       <div class="modal-body">
         <div class="support-grid">
           <div class="support-row"><b>App</b><span>RetroChat</span></div>
-          <div class="support-row"><b>Frontend</b><span id="supportFront">v0.1.3</span></div>
+          <div class="support-row"><b>Frontend</b><span id="supportFront">v0.1.11</span></div>
           <div class="support-row"><b>Backend</b><span id="supportBack">consultando...</span></div>
           <div class="support-row"><b>Usuario</b><span id="supportUser">—</span></div>
           <div class="support-row"><b>Chat activo</b><span id="supportChat">—</span></div>
           <div class="support-row"><b>Último seq</b><span id="supportSeq">—</span></div>
           <div class="support-row"><b>Última lectura</b><span id="supportLastPoll">—</span></div>
           <div class="support-row"><b>No leídos</b><span id="supportUnread">—</span></div>
-          <div class="support-row"><b>Cache</b><span>retrochat-v0-1-10</span></div>
+          <div class="support-row"><b>Cache</b><span>retrochat-v0-1-11</span></div>
         </div>
         <div id="supportStatus" class="status"></div>
         <div class="support-actions">
@@ -488,13 +531,12 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.1.10';
-  const LS_USER = 'retrochat_user_v0110';
-  const LS_INVITE = 'retrochat_invite_v0110';
-  const LS_LASTSEQ = 'retrochat_lastseq_v0110';
-  const LS_UNREAD = 'retrochat_unread_v0110';
-  const LS_READSEQ = 'retrochat_readseq_v0110';
-  const LS_BASELINED = 'retrochat_baselined_v0110';
+  const APP_VERSION = '0.1.11';
+  const LS_USER     = 'retrochat_user_v0111';
+  const LS_INVITE   = 'retrochat_invite_v0111';
+  const LS_LASTSEQ  = 'retrochat_lastseq_v0111';
+  const LS_UNREAD   = 'retrochat_unread_v0111';
+  const LS_READSEQ  = 'retrochat_readseq_v0111';
 
   const $ = (id) => document.getElementById(id);
 
@@ -505,15 +547,167 @@
   let messagesByChat = {};
   let chatByContactId = {};
   let unreadByContactId = loadJson(LS_UNREAD, {});
-  let readSeqByChat = loadJson(LS_READSEQ, {});
-  let baselinedByChat = loadJson(LS_BASELINED, {});
-  let lastSeqByChat = loadJson(LS_LASTSEQ, {});
+  let readSeqByChat     = loadJson(LS_READSEQ, {});
+  let lastSeqByChat     = loadJson(LS_LASTSEQ, {});
   let pollTimer = null;
   let heartbeatTimer = null;
   let findMode = 'phone';
   let lastPollAt = '';
   let pollingActive = false;
   let presencePollCount = 0;
+  let nudgeCooldown = false;
+
+  // ─── Audio (Web Audio API, sin archivos externos) ─────────────────────────
+
+  let audioCtx = null;
+
+  function getAudioCtx(){
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // resume por si el navegador lo suspendió
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  // Sonido de mensaje entrante: "ding" suave tipo MSN
+  function playSoundIncoming(){
+    try {
+      const ctx = getAudioCtx();
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      // Dos notas: re -> sol (clásico MSN-ish)
+      osc.frequency.setValueAtTime(587, t);
+      osc.frequency.setValueAtTime(784, t + 0.12);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.35, t + 0.02);
+      gain.gain.setValueAtTime(0.35, t + 0.12);
+      gain.gain.linearRampToValueAtTime(0, t + 0.38);
+      osc.start(t);
+      osc.stop(t + 0.4);
+    } catch(e){}
+  }
+
+  // Sonido de mensaje enviado: "pop" corto
+  function playSoundSent(){
+    try {
+      const ctx = getAudioCtx();
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, t);
+      osc.frequency.exponentialRampToValueAtTime(440, t + 0.09);
+      gain.gain.setValueAtTime(0.22, t);
+      gain.gain.linearRampToValueAtTime(0, t + 0.09);
+      osc.start(t);
+      osc.stop(t + 0.1);
+    } catch(e){}
+  }
+
+  // Sonido de nudge: secuencia tipo "bzzz bzzz" con vibrato
+  function playSoundNudge(){
+    try {
+      const ctx = getAudioCtx();
+      const t = ctx.currentTime;
+
+      function buzz(startTime, freq){
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, startTime);
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.28, startTime + 0.02);
+        gain.gain.setValueAtTime(0.28, startTime + 0.09);
+        gain.gain.linearRampToValueAtTime(0, startTime + 0.12);
+        osc.start(startTime);
+        osc.stop(startTime + 0.13);
+      }
+
+      // Tres pulsos rápidos: el clásico nudge de MSN/Messenger
+      buzz(t,       200);
+      buzz(t + 0.15, 220);
+      buzz(t + 0.30, 200);
+    } catch(e){}
+  }
+
+  // Vibración (solo en móvil/PWA que lo soportan)
+  function vibrate(pattern){
+    try {
+      if ('vibrate' in navigator) navigator.vibrate(pattern);
+    } catch(e){}
+  }
+
+  // ─── Notificaciones ───────────────────────────────────────────────────────
+
+  async function requestNotificationPermission(){
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default'){
+      await Notification.requestPermission().catch(()=>{});
+    }
+  }
+
+  function showNotification(title, body){
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    // No notificar si la pestaña tiene el foco
+    if (!document.hidden) return;
+    try {
+      new Notification(title, { body, icon: './icon.svg', tag: 'retrochat-msg' });
+    } catch(e){}
+  }
+
+  // ─── Nudge ────────────────────────────────────────────────────────────────
+
+  // El nudge se envía como mensaje especial con texto fijo.
+  // Al recibirlo, el receptor ve la animación + sonido + vibración.
+  const NUDGE_TEXT = '\u0007__NUDGE__\u0007'; // BEL char como marcador interno
+
+  function isNudgeMsg(m){ return String(m.texto || '').includes('__NUDGE__'); }
+
+  function triggerNudgeEffect(fromName){
+    playSoundNudge();
+    vibrate([80, 60, 80, 60, 80]);
+    const win = $('mainWindow');
+    win.classList.remove('nudging');
+    // Forzar reflow para reiniciar animación si ya estaba
+    void win.offsetWidth;
+    win.classList.add('nudging');
+    win.addEventListener('animationend', () => win.classList.remove('nudging'), { once:true });
+  }
+
+  async function sendNudge(){
+    if (!activeChat || !me || nudgeCooldown) return;
+    nudgeCooldown = true;
+    $('btnNudge').disabled = true;
+
+    try {
+      await api('sendMessage', {
+        chat_id: activeChat.chat_id,
+        usuario_id: me.id,
+        texto: NUDGE_TEXT
+      });
+      playSoundNudge();
+      vibrate([60, 40, 60]);
+      await loadMessages({ full:false });
+    } catch(err){
+      alert('No se pudo enviar el nudge: ' + err.message);
+    } finally {
+      // Cooldown de 8 segundos para no spamear
+      setTimeout(() => {
+        nudgeCooldown = false;
+        if (activeChat) $('btnNudge').disabled = false;
+      }, 8000);
+    }
+  }
+
+  // ─── Utilidades ───────────────────────────────────────────────────────────
 
   const qs = new URLSearchParams(location.search);
   const inviteFromUrl = qs.get('invite') || '';
@@ -528,22 +722,11 @@
   function parseBackendDate(value){
     if (!value) return null;
     if (value instanceof Date) return value;
-
     const s = String(value).trim();
-
-    // Backend GAS actual: yyyy-MM-dd HH:mm:ss
     const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
     if (m) {
-      return new Date(
-        Number(m[1]),
-        Number(m[2]) - 1,
-        Number(m[3]),
-        Number(m[4]),
-        Number(m[5]),
-        Number(m[6])
-      );
+      return new Date(Number(m[1]), Number(m[2])-1, Number(m[3]), Number(m[4]), Number(m[5]), Number(m[6]));
     }
-
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
   }
@@ -552,19 +735,11 @@
     const d = parseBackendDate(user && user.ultimo_online);
     if (!d) return false;
     const diffMs = Date.now() - d.getTime();
-
-    // Ventana generosa: heartbeat cada 60s, damos 15 minutos.
-    // Permitimos hasta 6h "hacia futuro" por diferencias de timezone GAS/dispositivo.
     return diffMs >= -21600000 && diffMs <= 900000;
   }
 
-  function onlineDotClass(user){
-    return isRecentlyOnline(user) ? 'en_linea' : 'offline';
-  }
-
-  function onlineLabel(user){
-    return isRecentlyOnline(user) ? 'En línea' : 'Desconectado';
-  }
+  function onlineDotClass(user){ return isRecentlyOnline(user) ? 'en_linea' : 'offline'; }
+  function onlineLabel(user){ return isRecentlyOnline(user) ? 'En línea' : 'Desconectado'; }
 
   function initials(name){
     return String(name || '?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || '?';
@@ -575,9 +750,7 @@
     catch { return fallback; }
   }
 
-  function saveJson(key, value){
-    localStorage.setItem(key, JSON.stringify(value));
-  }
+  function saveJson(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
 
   function encodeData(data){
     const p = new URLSearchParams();
@@ -598,6 +771,8 @@
   function loadSession(){ return loadJson(LS_USER, null); }
   function clearSession(){ localStorage.removeItem(LS_USER); }
 
+  // ─── Auth ─────────────────────────────────────────────────────────────────
+
   function showAuth(){
     $('auth').style.display = 'grid';
     $('shell').classList.remove('active');
@@ -614,7 +789,10 @@
     renderContacts();
     startHeartbeat();
     startPolling();
+    requestNotificationPermission();
   }
+
+  // ─── Estado de lectura ────────────────────────────────────────────────────
 
   function maxSeqOf(list){
     return (list || []).reduce((max,m) => Math.max(max, Number(m.seq || 0)), 0);
@@ -622,36 +800,30 @@
 
   function recomputeUnreadForContact(contactId){
     const chat = chatByContactId[contactId];
-    if (!chat) {
-      unreadByContactId[contactId] = 0;
-      return 0;
-    }
-
+    if (!chat){ unreadByContactId[contactId] = 0; return 0; }
     const chatId = chat.chat_id;
     const readSeq = Number(readSeqByChat[chatId] || 0);
-    const msgs = messagesByChat[chatId] || [];
-
-    const count = msgs.filter(m =>
+    const msgs = (messagesByChat[chatId] || []).filter(m =>
+      !isNudgeMsg(m) && // nudges no cuentan como no leídos
       m.usuario_id !== me.id &&
       Number(m.seq || 0) > readSeq
-    ).length;
-
-    unreadByContactId[contactId] = count;
-    return count;
+    );
+    unreadByContactId[contactId] = msgs.length;
+    return msgs.length;
   }
 
   function saveReadState(){
     saveJson(LS_UNREAD, unreadByContactId);
     saveJson(LS_READSEQ, readSeqByChat);
-    saveJson(LS_BASELINED, baselinedByChat);
   }
 
+  // ─── Render ───────────────────────────────────────────────────────────────
 
   function renderContacts(){
     const box = $('contactList');
     box.innerHTML = '';
     if (!contacts.length){
-      box.innerHTML = '<div class="empty" style="height:auto;padding:18px"><div><b>Sin contactos todavía</b><p>Usá “Agregar” para buscar por celular/usuario o invitar por WhatsApp.</p></div></div>';
+      box.innerHTML = '<div class="empty" style="height:auto;padding:18px"><div><b>Sin contactos todavía</b><p>Usá "Agregar" para buscar por celular/usuario o invitar por WhatsApp.</p></div></div>';
       return;
     }
     contacts.forEach(c => {
@@ -665,7 +837,7 @@
       div.innerHTML = `
         <div class="dot ${onlineDotClass(c)}"></div>
         <div class="mini-avatar">${initials(c.nombre || c.alias || c.usuario)}</div>
-        <div style="min-width:0">
+        <div style="min-width:0;flex:1">
           <strong>${escapeHtml(c.nombre || c.alias || c.usuario || 'Contacto')}</strong>
           <small>${escapeHtml(presence + ' · ' + (c.frase || subtitle))}</small>
         </div>
@@ -679,17 +851,45 @@
     if (!me) return;
     const r = await api('getContacts', { usuario_id: me.id });
     contacts = r.contactos || [];
-
     if (activeContact) {
       const updated = contacts.find(c => c.id === activeContact.id);
-      if (updated) {
+      if (updated){
         activeContact = updated;
         $('chatSub').textContent = onlineLabel(updated) + ' · ' + (updated.usuario ? '@' + updated.usuario : (updated.telefono ? 'Celular: ' + updated.telefono : 'Chat directo'));
       }
     }
-
     renderContacts();
   }
+
+  function renderMessages(msgs){
+    const box = $('messages');
+    if (!msgs.length){
+      box.innerHTML = '<div class="empty"><div><h2>Sin mensajes</h2><p>Mandá el primero. Que sea histórico, tampoco "hola" seco.</p></div></div>';
+      return;
+    }
+    const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+    box.innerHTML = '';
+    msgs.forEach(m => {
+      const div = document.createElement('div');
+      if (isNudgeMsg(m)){
+        div.className = 'msg-nudge';
+        const esPropio = m.usuario_id === me.id;
+        div.textContent = esPropio
+          ? '👋 Mandaste un nudge!'
+          : '👋 ' + escapeHtml(m.usuario_nombre || 'Contacto') + ' te mandó un nudge!';
+      } else {
+        div.className = 'msg' + (m.usuario_id === me.id ? ' me' : '');
+        div.innerHTML = `
+          <div class="who">${escapeHtml(m.usuario_nombre || 'Usuario')} dice:</div>
+          <div class="txt">${escapeHtml(m.texto || '')}</div>
+          <div class="time">#${escapeHtml(String(m.seq || ''))} · ${escapeHtml(m.fecha || '')}</div>`;
+      }
+      box.appendChild(div);
+    });
+    if (wasAtBottom) box.scrollTop = box.scrollHeight;
+  }
+
+  // ─── Abrir contacto ───────────────────────────────────────────────────────
 
   async function openContact(c){
     activeContact = c;
@@ -699,6 +899,7 @@
     $('chatAvatar').textContent = initials(c.nombre || c.alias || c.usuario);
     $('msgText').disabled = false;
     $('btnSend').disabled = false;
+    $('btnNudge').disabled = false;
     $('shell').classList.add('chat-open');
 
     const r = await api('createOrGetDirectChat', { usuario_id: me.id, contacto_id: c.id });
@@ -708,12 +909,11 @@
     const chatId = activeChat.chat_id;
     if (!messagesByChat[chatId]) messagesByChat[chatId] = [];
 
-    // Siempre que se abre un chat hacemos una carga completa de los últimos 100.
     await loadMessages({ full:true });
 
-    // Marcar como leído hasta el último seq realmente descargado.
-    readSeqByChat[chatId] = maxSeqOf(messagesByChat[chatId]);
-    baselinedByChat[chatId] = true;
+    // Marcar como leído: readSeq = último seq real descargado
+    const currentMax = maxSeqOf(messagesByChat[chatId]);
+    readSeqByChat[chatId] = currentMax;
     unreadByContactId[c.id] = 0;
     saveReadState();
     renderContacts();
@@ -721,9 +921,10 @@
     startPolling();
   }
 
+  // ─── Mensajes ─────────────────────────────────────────────────────────────
+
   async function loadMessages(opts = {}){
     if (!activeChat) return;
-
     const chatId = activeChat.chat_id;
     const sinceSeq = opts.full ? 0 : Number(lastSeqByChat[chatId] || 0);
 
@@ -737,63 +938,64 @@
     const incoming = r.mensajes || [];
     lastPollAt = nowLocal();
 
-    if (opts.full) {
+    // Detectar mensajes nuevos del otro para sonido/notificación ANTES de mergear
+    const previousMax = maxSeqOf(messagesByChat[chatId] || []);
+
+    if (opts.full){
       messagesByChat[chatId] = incoming;
-    } else if (incoming.length) {
+    } else if (incoming.length){
       const existing = messagesByChat[chatId] || [];
       const seen = new Set(existing.map(m => m.id));
       incoming.forEach(m => { if (!seen.has(m.id)) existing.push(m); });
-      existing.sort((a,b) => Number(a.seq || 0) - Number(b.seq || 0));
+      existing.sort((a,b) => Number(a.seq||0) - Number(b.seq||0));
       messagesByChat[chatId] = existing.slice(-150);
     }
 
-    const lastSeqFromMessages = (messagesByChat[chatId] || []).reduce((max,m) => {
-      const seq = Number(m.seq || 0);
-      return seq > max ? seq : max;
-    }, 0);
+    // Calcular nuevo máximo real
+    const newMax = maxSeqOf(messagesByChat[chatId] || []);
 
-    // Importante:
-    // En respuestas incrementales vacías NO avanzamos usando r.last_seq.
-    // El backend devuelve chat.ultimo_seq aunque no mande filas, y eso podía hacer
-    // que el cliente "crea" que ya leyó mensajes que nunca descargó.
-    const nextLastSeq = opts.full || incoming.length
-      ? Math.max(lastSeqFromMessages, Number(r.last_seq || 0), sinceSeq)
+    // Avanzar lastSeq solo si realmente llegaron mensajes
+    const nextLastSeq = (opts.full || incoming.length)
+      ? Math.max(newMax, Number(r.last_seq || 0), sinceSeq)
       : sinceSeq;
 
     lastSeqByChat[chatId] = nextLastSeq;
     saveJson(LS_LASTSEQ, lastSeqByChat);
-
     $('chatSeq').textContent = 'seq: ' + nextLastSeq;
 
-    // Si el chat está abierto, todo lo recibido se considera leído.
-    if (activeChat && activeChat.chat_id === chatId && activeContact) {
-      readSeqByChat[chatId] = maxSeqOf(messagesByChat[chatId] || []);
+    // Mensajes nuevos del otro: sonido, notificación, nudge
+    if (!opts.full && newMax > previousMax){
+      const nuevos = (messagesByChat[chatId] || []).filter(m =>
+        Number(m.seq || 0) > previousMax && m.usuario_id !== me.id
+      );
+      if (nuevos.length){
+        const hayNudge = nuevos.some(isNudgeMsg);
+        const hayMensaje = nuevos.some(m => !isNudgeMsg(m));
+
+        if (hayNudge){
+          triggerNudgeEffect(activeContact ? activeContact.nombre : '');
+        }
+        if (hayMensaje){
+          playSoundIncoming();
+          vibrate([60]);
+          const ultimo = nuevos.filter(m => !isNudgeMsg(m)).pop();
+          showNotification(
+            activeContact ? (activeContact.nombre || activeContact.usuario || 'RetroChat') : 'RetroChat',
+            ultimo ? ultimo.texto : 'Nuevo mensaje'
+          );
+        }
+      }
+    }
+
+    // Si el chat está abierto, marcar todo como leído
+    if (activeChat && activeChat.chat_id === chatId && activeContact){
+      readSeqByChat[chatId] = newMax;
       unreadByContactId[activeContact.id] = 0;
-      baselinedByChat[chatId] = true;
       saveReadState();
       renderContacts();
     }
 
     renderMessages(messagesByChat[chatId] || []);
-  }
-
-  function renderMessages(msgs){
-    const box = $('messages');
-    if (!msgs.length){
-      box.innerHTML = '<div class="empty"><div><h2>Sin mensajes</h2><p>Mandá el primero. Que sea histórico, tampoco “hola” seco.</p></div></div>';
-      return;
-    }
-    box.innerHTML = '';
-    msgs.forEach(m => {
-      const div = document.createElement('div');
-      div.className = 'msg' + (m.usuario_id === me.id ? ' me' : '');
-      div.innerHTML = `
-        <div class="who">${escapeHtml(m.usuario_nombre || 'Usuario')} dice:</div>
-        <div class="txt">${escapeHtml(m.texto || '')}</div>
-        <div class="time">#${escapeHtml(m.seq || '')} · ${escapeHtml(m.fecha || '')}</div>`;
-      box.appendChild(div);
-    });
-    box.scrollTop = box.scrollHeight;
   }
 
   async function sendMessage(){
@@ -803,9 +1005,7 @@
     try{
       await api('sendMessage', { chat_id: activeChat.chat_id, usuario_id: me.id, texto: txt });
       $('msgText').value = '';
-
-      // No agregamos el mensaje localmente de forma optimista.
-      // Dejamos que vuelva desde backend para evitar duplicados temporales.
+      playSoundSent();
       await loadMessages({ full:false });
     }catch(err){
       alert('No se pudo enviar: ' + err.message);
@@ -815,81 +1015,112 @@
     }
   }
 
+  // ─── Scan de no leídos para chats no abiertos ────────────────────────────
+  // FIX: inicializa readSeq al ultimo_seq actual del chat (no en 0)
+  // FIX: usa since_seq incremental en lugar de always 0
+
+  async function initChatForContact(c){
+    let chat = chatByContactId[c.id];
+    if (!chat){
+      const rChat = await api('createOrGetDirectChat', { usuario_id: me.id, contacto_id: c.id });
+      chat = rChat.chat;
+      chatByContactId[c.id] = chat;
+    }
+    return chat;
+  }
+
   async function baselineUnreadContacts(){
+    // Corre una sola vez al iniciar sesión.
+    // Para chats nunca vistos: readSeq = ultimo_seq del chat (no hay pendientes de antes).
+    // Para chats ya conocidos: respeta el readSeq guardado en LS.
     if (!me || !contacts.length) return;
 
-    // No marcamos chats como leídos acá.
-    // Solo preparamos el mapa de chats. Lo leído se marca al abrir el chat.
-    for (const c of contacts) {
+    for (const c of contacts){
       try {
-        let chat = chatByContactId[c.id];
-
-        if (!chat) {
-          const rChat = await api('createOrGetDirectChat', { usuario_id: me.id, contacto_id: c.id });
-          chat = rChat.chat;
-          chatByContactId[c.id] = chat;
-        }
-
+        const chat = await initChatForContact(c);
         const chatId = chat.chat_id;
 
-        if (readSeqByChat[chatId] === undefined || readSeqByChat[chatId] === null) {
-          readSeqByChat[chatId] = 0;
+        if (readSeqByChat[chatId] === undefined || readSeqByChat[chatId] === null){
+          // Primera vez que vemos este chat: baseline al seq actual, sin marcar nada como no leído
+          const remoteSeq = Number(chat.ultimo_seq || 0);
+          readSeqByChat[chatId] = remoteSeq;
+          lastSeqByChat[chatId] = remoteSeq;
+          unreadByContactId[c.id] = 0;
         }
-      } catch(err) {}
+        // Si ya existe readSeq, no tocamos nada; el scanUnread lo va a computar
+      } catch(err){}
     }
 
     saveReadState();
+    saveJson(LS_LASTSEQ, lastSeqByChat);
     renderContacts();
   }
 
   async function scanUnreadContacts(){
+    // Revisa mensajes nuevos en chats no activos usando since_seq incremental.
     if (!me || !contacts.length) return;
 
-    for (const c of contacts) {
-      try{
-        let chat = chatByContactId[c.id];
+    for (const c of contacts){
+      // No escanear el chat abierto; loadMessages lo maneja
+      if (activeContact && activeContact.id === c.id) continue;
 
-        if (!chat) {
-          const rChat = await api('createOrGetDirectChat', { usuario_id: me.id, contacto_id: c.id });
-          chat = rChat.chat;
-          chatByContactId[c.id] = chat;
-        }
-
+      try {
+        const chat = await initChatForContact(c);
         const chatId = chat.chat_id;
+
+        const sinceSeq = Number(lastSeqByChat[chatId] || readSeqByChat[chatId] || 0);
+
+        // NO usamos chat.ultimo_seq cacheado para decidir el skip:
+        // chatByContactId queda en memoria y ultimo_seq puede estar viejo.
+        // Siempre pedimos al backend con since_seq incremental.
+        // TODO: optimizar con endpoint getChatsSummary cuando el volumen lo justifique.
 
         const r = await api('getMessages', {
           chat_id: chatId,
           usuario_id: me.id,
-          since_seq: 0,
-          limit: 50
+          since_seq: sinceSeq,
+          limit: 30
         });
 
         const msgs = r.mensajes || [];
-        messagesByChat[chatId] = msgs;
+        if (!msgs.length) continue;
 
-        const maxSeq = Math.max(maxSeqOf(msgs), Number(r.last_seq || 0));
-        lastSeqByChat[chatId] = maxSeq;
+        // Mergear sin pisar mensajes del chat activo
+        const existing = messagesByChat[chatId] || [];
+        const seen = new Set(existing.map(m => m.id));
+        msgs.forEach(m => { if (!seen.has(m.id)) existing.push(m); });
+        existing.sort((a,b) => Number(a.seq||0) - Number(b.seq||0));
+        messagesByChat[chatId] = existing.slice(-150);
 
-        if (readSeqByChat[chatId] === undefined || readSeqByChat[chatId] === null) {
-          readSeqByChat[chatId] = 0;
+        const newMax = maxSeqOf(messagesByChat[chatId]);
+        lastSeqByChat[chatId] = newMax;
+
+        // Sonido/notificación por mensajes en chats no abiertos
+        const hayNudge = msgs.some(m => isNudgeMsg(m) && m.usuario_id !== me.id);
+        const hayMensaje = msgs.some(m => !isNudgeMsg(m) && m.usuario_id !== me.id);
+
+        if (hayNudge) triggerNudgeEffect(c.nombre || c.usuario || '');
+        if (hayMensaje){
+          playSoundIncoming();
+          vibrate([60]);
+          const ultimo = msgs.filter(m => !isNudgeMsg(m) && m.usuario_id !== me.id).pop();
+          showNotification(
+            c.nombre || c.usuario || 'RetroChat',
+            ultimo ? ultimo.texto : 'Nuevo mensaje'
+          );
         }
 
-        if (activeContact && activeContact.id === c.id) {
-          readSeqByChat[chatId] = maxSeq;
-          unreadByContactId[c.id] = 0;
-        } else {
-          recomputeUnreadForContact(c.id);
-        }
-
-        baselinedByChat[chatId] = true;
-        saveJson(LS_LASTSEQ, lastSeqByChat);
+        recomputeUnreadForContact(c.id);
         saveReadState();
+        saveJson(LS_LASTSEQ, lastSeqByChat);
 
-      }catch(err){}
+      } catch(err){}
     }
 
     renderContacts();
   }
+
+  // ─── Polling ──────────────────────────────────────────────────────────────
 
   function startPolling(){
     stopPolling();
@@ -897,27 +1128,19 @@
 
     const tick = async () => {
       if (!pollingActive) return;
-
-      if (me) {
+      if (me){
         try {
-          if (activeChat) {
-            await loadMessages({ full:false });
-          }
+          if (activeChat) await loadMessages({ full:false });
 
-          // Revisamos chats no abiertos para mostrar no leídos.
           presencePollCount++;
           await scanUnreadContacts().catch(()=>{});
 
-          // Cada ~6s actualizamos contactos para recalcular presencia online/offline.
-          if (presencePollCount >= 2) {
+          if (presencePollCount >= 2){
             presencePollCount = 0;
             await refreshContacts().catch(()=>{});
           }
-        } catch (err) {}
+        } catch(err){}
       }
-
-      // En celular/instalada, Android puede dormir timers.
-      // Cuando está visible poll rápido; si queda oculta, baja frecuencia.
       const delay = document.hidden ? 15000 : 3000;
       pollTimer = setTimeout(tick, delay);
     };
@@ -931,20 +1154,6 @@
     pollTimer = null;
   }
 
-  async function wakeAndRefresh(reason){
-    if (!me) return;
-
-    try{
-      if (activeChat) {
-        await loadMessages({ full:true });
-        startPolling();
-      } else {
-        await refreshContacts().catch(()=>{});
-        await scanUnreadContacts().catch(()=>{});
-      }
-    }catch(err){}
-  }
-
   function startHeartbeat(){
     stopHeartbeat();
     if (!me || !me.id) return;
@@ -953,65 +1162,83 @@
       api('heartbeat', { usuario_id: me.id }).catch(()=>{});
     }, 60000);
   }
+
   function stopHeartbeat(){
     if (heartbeatTimer) clearInterval(heartbeatTimer);
     heartbeatTimer = null;
   }
 
-  function escapeHtml(s){
-    return String(s ?? '').replace(/[&<>"']/g, c => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-    }[c]));
+  async function wakeAndRefresh(){
+    if (!me) return;
+    try {
+      if (activeChat) await loadMessages({ full:true });
+      else {
+        await refreshContacts().catch(()=>{});
+        await scanUnreadContacts().catch(()=>{});
+      }
+      startPolling();
+    } catch(err){}
   }
 
-  function switchTab(which){
-    const login = which === 'login';
-    $('tabLogin').classList.toggle('active', login);
-    $('tabRegister').classList.toggle('active', !login);
-    $('loginForm').style.display = login ? 'block' : 'none';
-    $('registerForm').style.display = login ? 'none' : 'block';
-    setStatus($('authStatus'), '');
-  }
+  // ─── Soporte ──────────────────────────────────────────────────────────────
 
-  async function doLogin(){
-    setStatus($('authStatus'), 'Conectando...');
-    try{
-      const loginValue = $('loginId').value.trim();
-      const r = await api('login', { login: loginValue, pin:$('loginPin').value.trim() });
-      me = r.usuario;
-      contacts = r.contactos || [];
-      saveSession(me);
-      setStatus($('authStatus'), '');
-      showApp();
-      await baselineUnreadContacts().catch(()=>{});
-    }catch(err){
-      setStatus($('authStatus'), err.message);
+  async function refreshAppData(showFeedback = true){
+    const oldTitle = $('btnHeaderRefresh') ? $('btnHeaderRefresh').textContent : '';
+    try {
+      if ($('btnHeaderRefresh')){
+        $('btnHeaderRefresh').textContent = '…';
+        $('btnHeaderRefresh').disabled = true;
+      }
+      if (me && me.id){
+        await refreshContacts().catch(()=>{});
+        await api('heartbeat', { usuario_id: me.id }).catch(()=>{});
+        if (activeChat) await loadMessages({ full:true }).catch(()=>{});
+      }
+      if (showFeedback && $('supportStatus')) $('supportStatus').textContent = 'Datos actualizados.';
+    } finally {
+      if ($('btnHeaderRefresh')){
+        $('btnHeaderRefresh').textContent = oldTitle || '↻';
+        $('btnHeaderRefresh').disabled = false;
+      }
     }
   }
 
-  async function doRegister(){
-    setStatus($('authStatus'), 'Creando cuenta...');
-    try{
-      const inviteCode = localStorage.getItem(LS_INVITE) || '';
-      const r = await api('registerUser', {
-        nombre:$('regName').value.trim(),
-        usuario:$('regUser').value.trim(),
-        telefono:$('regPhone').value.trim(),
-        pin:$('regPin').value.trim(),
-        invite_code: inviteCode
-      });
-      localStorage.removeItem(LS_INVITE);
-      me = r.usuario;
-      saveSession(me);
-      contacts = [];
-      setStatus($('authStatus'), '');
-      showApp();
-      await refreshContacts().catch(()=>{});
-      await baselineUnreadContacts().catch(()=>{});
-    }catch(err){
-      setStatus($('authStatus'), err.message);
+  async function openSupport(){
+    $('supportWrap').classList.add('show');
+    $('supportFront').textContent = 'v' + APP_VERSION;
+    $('supportUser').textContent = me ? ((me.nombre || me.usuario || me.id) + (me.usuario ? ' (@' + me.usuario + ')' : '')) : 'sin sesión';
+    $('supportChat').textContent = activeChat ? activeChat.chat_id : 'sin chat activo';
+    $('supportSeq').textContent = activeChat ? String(lastSeqByChat[activeChat.chat_id] || 0) : '—';
+    $('supportLastPoll').textContent = lastPollAt || '—';
+    $('supportUnread').textContent = Object.values(unreadByContactId).reduce((a,b)=>a+Number(b||0),0);
+    $('supportStatus').textContent = '';
+    try {
+      const r = await api('ping', {});
+      $('supportBack').textContent = 'v' + (r.version || '?') + ' · ' + (r.status || 'online');
+    } catch(err){
+      $('supportBack').textContent = 'error';
+      $('supportStatus').textContent = 'No pude consultar backend: ' + err.message;
     }
   }
+
+  function closeSupport(){ $('supportWrap').classList.remove('show'); }
+
+  async function forceReloadApp(){
+    $('supportStatus').textContent = 'Limpiando caché y recargando...';
+    try {
+      if ('serviceWorker' in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      if ('caches' in window){
+        const keys = await caches.keys();
+        await Promise.all(keys.filter(k => k.includes('retrochat')).map(k => caches.delete(k)));
+      }
+    } catch(err){}
+    location.replace(location.origin + location.pathname + '?v=' + Date.now());
+  }
+
+  // ─── Modal agregar contacto ───────────────────────────────────────────────
 
   function openModal(){
     $('modalWrap').classList.add('show');
@@ -1040,11 +1267,9 @@
       setStatus($('modalStatus'), 'Ese sos vos, campeón. No hace falta agregarte.');
       return;
     }
-
     await api('addContact', { usuario_id: me.id, contacto_id: foundUser.id });
     await api('addContact', { usuario_id: foundUser.id, contacto_id: me.id }).catch(()=>{});
     await refreshContacts();
-
     setStatus($('modalStatus'), 'Contacto agregado: ' + (foundUser.nombre || foundUser.alias || foundUser.usuario));
   }
 
@@ -1052,123 +1277,97 @@
     const phone = $('contactPhone').value.trim();
     setStatus($('modalStatus'), 'Buscando...');
     $('inviteBox').style.display = 'none';
-    try{
+    try {
       const r = await api('findUserByPhone', { telefono: phone });
       if (!r.found){
         setStatus($('modalStatus'), 'No está registrado. Podés invitarlo por WhatsApp.');
         return;
       }
       await addFoundUser(r.usuario);
-    }catch(err){
-      setStatus($('modalStatus'), err.message);
-    }
+    } catch(err){ setStatus($('modalStatus'), err.message); }
   }
 
   async function findContactByUser(){
     const user = $('contactUser').value.trim();
     setStatus($('modalStatus'), 'Buscando usuario...');
     $('inviteBox').style.display = 'none';
-    try{
+    try {
       const r = await api('findUserByHandle', { usuario: user });
       if (!r.found){
         setStatus($('modalStatus'), 'No encontré ese usuario.');
         return;
       }
       await addFoundUser(r.usuario);
-    }catch(err){
-      setStatus($('modalStatus'), err.message);
-    }
+    } catch(err){ setStatus($('modalStatus'), err.message); }
   }
 
   async function inviteWhatsApp(){
     const phone = $('contactPhone').value.trim();
     setStatus($('modalStatus'), 'Creando invitación...');
-    try{
+    try {
       const r = await api('createInvite', { creado_por: me.id, telefono_destino: phone });
       const box = $('inviteBox');
       box.style.display = 'block';
       box.innerHTML = '<b>Invitación lista:</b><br>' + escapeHtml(r.invite_url || '') + '<br><br><b>WhatsApp:</b><br>' + escapeHtml(r.whatsapp_url || '');
       setStatus($('modalStatus'), 'Abrí WhatsApp para enviar la invitación.');
       if (r.whatsapp_url) window.open(r.whatsapp_url, '_blank');
-    }catch(err){
-      setStatus($('modalStatus'), err.message);
-    }
+    } catch(err){ setStatus($('modalStatus'), err.message); }
   }
 
+  // ─── Auth forms ───────────────────────────────────────────────────────────
 
-  async function refreshAppData(showFeedback = true){
-    const oldTitle = $('btnHeaderRefresh') ? $('btnHeaderRefresh').textContent : '';
-    try{
-      if ($('btnHeaderRefresh')) {
-        $('btnHeaderRefresh').textContent = '…';
-        $('btnHeaderRefresh').disabled = true;
-      }
-
-      if (me && me.id) {
-        await refreshContacts().catch(()=>{});
-        await api('heartbeat', { usuario_id: me.id }).catch(()=>{});
-
-        if (activeChat) {
-          // Recarga completa del chat activo para evitar estados viejos.
-          await loadMessages({ full:true }).catch(()=>{});
-        }
-      }
-
-      if (showFeedback && $('supportStatus')) {
-        $('supportStatus').textContent = 'Datos actualizados.';
-      }
-    } finally {
-      if ($('btnHeaderRefresh')) {
-        $('btnHeaderRefresh').textContent = oldTitle || '↻';
-        $('btnHeaderRefresh').disabled = false;
-      }
-    }
+  function switchTab(which){
+    const login = which === 'login';
+    $('tabLogin').classList.toggle('active', login);
+    $('tabRegister').classList.toggle('active', !login);
+    $('loginForm').style.display = login ? 'block' : 'none';
+    $('registerForm').style.display = login ? 'none' : 'block';
+    setStatus($('authStatus'), '');
   }
 
-  async function openSupport(){
-    $('supportWrap').classList.add('show');
-
-    $('supportFront').textContent = 'v' + APP_VERSION;
-    $('supportUser').textContent = me ? ((me.nombre || me.usuario || me.id) + (me.usuario ? ' (@' + me.usuario + ')' : '')) : 'sin sesión';
-    $('supportChat').textContent = activeChat ? activeChat.chat_id : 'sin chat activo';
-    $('supportSeq').textContent = activeChat ? String(lastSeqByChat[activeChat.chat_id] || 0) : '—';
-    $('supportLastPoll').textContent = lastPollAt || '—';
-    $('supportUnread').textContent = Object.values(unreadByContactId).reduce((a,b)=>a+Number(b||0),0);
-    $('supportStatus').textContent = '';
-
-    try{
-      const r = await api('ping', {});
-      $('supportBack').textContent = 'v' + (r.version || '?') + ' · ' + (r.status || 'online');
-    }catch(err){
-      $('supportBack').textContent = 'error';
-      $('supportStatus').textContent = 'No pude consultar backend: ' + err.message;
-    }
+  async function doLogin(){
+    setStatus($('authStatus'), 'Conectando...');
+    try {
+      const loginValue = $('loginId').value.trim();
+      const r = await api('login', { login: loginValue, pin: $('loginPin').value.trim() });
+      me = r.usuario;
+      contacts = r.contactos || [];
+      saveSession(me);
+      setStatus($('authStatus'), '');
+      showApp();
+      await baselineUnreadContacts().catch(()=>{});
+    } catch(err){ setStatus($('authStatus'), err.message); }
   }
 
-  function closeSupport(){
-    $('supportWrap').classList.remove('show');
+  async function doRegister(){
+    setStatus($('authStatus'), 'Creando cuenta...');
+    try {
+      const inviteCode = localStorage.getItem(LS_INVITE) || '';
+      const r = await api('registerUser', {
+        nombre:   $('regName').value.trim(),
+        usuario:  $('regUser').value.trim(),
+        telefono: $('regPhone').value.trim(),
+        pin:      $('regPin').value.trim(),
+        invite_code: inviteCode
+      });
+      localStorage.removeItem(LS_INVITE);
+      me = r.usuario;
+      saveSession(me);
+      contacts = [];
+      setStatus($('authStatus'), '');
+      showApp();
+      await refreshContacts().catch(()=>{});
+      await baselineUnreadContacts().catch(()=>{});
+    } catch(err){ setStatus($('authStatus'), err.message); }
   }
 
-  async function forceReloadApp(){
-    $('supportStatus').textContent = 'Limpiando caché y recargando...';
+  // ─── Escape ───────────────────────────────────────────────────────────────
 
-    try{
-      if ('serviceWorker' in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(r => r.unregister()));
-      }
-
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.filter(k => k.includes('retrochat')).map(k => caches.delete(k)));
-      }
-    }catch(err){}
-
-    const cleanUrl = location.origin + location.pathname + '?v=' + Date.now();
-    location.replace(cleanUrl);
+  function escapeHtml(s){
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   }
 
-
+  // ─── Event listeners ──────────────────────────────────────────────────────
 
   $('btnHeaderRefresh').addEventListener('click', () => refreshAppData(false).catch(err => alert('No pude actualizar: ' + err.message)));
   $('btnSupport').addEventListener('click', openSupport);
@@ -1186,13 +1385,15 @@
 
   $('btnLogout').addEventListener('click', () => {
     clearSession();
-    me=null; contacts=[]; activeChat=null; activeContact=null;
-    messagesByChat={}; chatByContactId={}; unreadByContactId={}; readSeqByChat={}; baselinedByChat={};
-    saveJson(LS_UNREAD, unreadByContactId);
-    saveJson(LS_READSEQ, readSeqByChat);
-    saveJson(LS_BASELINED, baselinedByChat);
+    me=null; contacts=[]; activeContact=null; activeChat=null;
+    messagesByChat={}; chatByContactId={}; unreadByContactId={}; readSeqByChat={};
+    lastSeqByChat={};
+    saveJson(LS_UNREAD, {});
+    saveJson(LS_READSEQ, {});
+    saveJson(LS_LASTSEQ, {});
     showAuth();
   });
+
   $('btnRefresh').addEventListener('click', () => refreshContacts().catch(err => alert(err.message)));
   $('btnAddContact').addEventListener('click', openModal);
   $('btnCloseModal').addEventListener('click', closeModal);
@@ -1203,10 +1404,21 @@
   $('btnFindUser').addEventListener('click', findContactByUser);
   $('btnInvite').addEventListener('click', inviteWhatsApp);
   $('btnSend').addEventListener('click', sendMessage);
+  $('btnNudge').addEventListener('click', sendNudge);
   $('btnBack').addEventListener('click', () => $('shell').classList.remove('chat-open'));
   $('msgText').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
   });
+
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) wakeAndRefresh(); });
+  window.addEventListener('focus', () => wakeAndRefresh());
+  window.addEventListener('pageshow', () => wakeAndRefresh());
+
+  if ('serviceWorker' in navigator){
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  }
+
+  // ─── Arranque ─────────────────────────────────────────────────────────────
 
   const cached = loadSession();
   if (cached && cached.id){
@@ -1217,17 +1429,6 @@
     showAuth();
   }
 
-
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) wakeAndRefresh('visible');
-  });
-
-  window.addEventListener('focus', () => wakeAndRefresh('focus'));
-  window.addEventListener('pageshow', () => wakeAndRefresh('pageshow'));
-
-  if ('serviceWorker' in navigator){
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-  }
 })();
 </script>
 </body>
