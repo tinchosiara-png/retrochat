@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.1.18 Push Test</title>
+  <title>RetroChat v0.2.0 Push Beta</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -361,6 +361,33 @@
     .support-actions button{flex:1}
 
 
+
+    .support-section-title{
+      margin:14px 2px 7px;
+      font-size:12px;
+      color:#315c80;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+    .support-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:12px;
+    }
+    .support-actions button{
+      width:100%;
+      min-height:54px;
+      white-space:normal;
+      line-height:1.12;
+      padding:10px 8px;
+      font-size:14px;
+    }
+    .support-actions .wide{grid-column:1 / -1}
+    .advanced-debug{display:none}
+    .advanced-debug.show{display:block}
+
     .switch-line{
       display:flex;
       align-items:flex-start;
@@ -421,7 +448,7 @@
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.1.18 · Push Test</small>
+        <small id="topVersion">v0.2.0 · Push Beta</small>
         <div class="header-actions">
           <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
           <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
@@ -642,26 +669,39 @@
       </div>
       <div class="modal-body">
         <div class="support-grid">
+          <div class="support-section-title">Estado general</div>
           <div class="support-row"><b>App</b><span>RetroChat</span></div>
-          <div class="support-row"><b>Frontend</b><span id="supportFront">v0.1.18 Push Test</span></div>
-          <div class="support-row"><b>Heartbeat como</b><span id="supportHbUser">—</span></div>
+          <div class="support-row"><b>Versión</b><span id="supportFront">v0.2.0 Push Beta</span></div>
           <div class="support-row"><b>Backend</b><span id="supportBack">consultando...</span></div>
           <div class="support-row"><b>Usuario</b><span id="supportUser">—</span></div>
-          <div class="support-row"><b>Chat activo</b><span id="supportChat">—</span></div>
-          <div class="support-row"><b>Último seq</b><span id="supportSeq">—</span></div>
-          <div class="support-row"><b>Última lectura</b><span id="supportLastPoll">—</span></div>
-          <div class="support-row"><b>No leídos</b><span id="supportUnread">—</span></div>
+
+          <div class="support-section-title">Notificaciones</div>
           <div class="support-row"><b>Push</b><span id="supportPush">sin activar</span></div>
-          <div class="support-row"><b>Token push</b><span id="supportPushToken">—</span></div>
-          <div class="support-row"><b>Cache</b><span>retrochat-v0-1-18</span></div>
+
+          <button id="btnToggleDebug" class="secondary wide" type="button">Mostrar datos técnicos</button>
+
+          <div id="advancedDebug" class="advanced-debug">
+            <div class="support-section-title">Datos técnicos</div>
+            <div class="support-row"><b>Heartbeat como</b><span id="supportHbUser">—</span></div>
+            <div class="support-row"><b>Chat activo</b><span id="supportChat">—</span></div>
+            <div class="support-row"><b>Último seq</b><span id="supportSeq">—</span></div>
+            <div class="support-row"><b>Última lectura</b><span id="supportLastPoll">—</span></div>
+            <div class="support-row"><b>No leídos</b><span id="supportUnread">—</span></div>
+            <div class="support-row"><b>Token push</b><span id="supportPushToken">—</span></div>
+            <div class="support-row"><b>Push foreground</b><span id="supportPushFg">esperando</span></div>
+            <div class="support-row"><b>Cache</b><span>retrochat-v0-2-0</span></div>
+          </div>
         </div>
         <div id="supportStatus" class="status"></div>
         <div class="support-actions">
+          <div class="support-actions">
           <button id="btnEnablePush" class="primary" type="button">Activar notificaciones</button>
+          <button id="btnTestPushDelay" class="secondary" type="button">Prueba en 8s</button>
           <button id="btnTestPush" class="secondary" type="button">Enviar prueba push</button>
+          <button id="btnSupportRefresh" class="secondary" type="button">Actualizar datos</button>
           <button id="btnCopyPushToken" class="secondary" type="button">Copiar token</button>
-          <button id="btnSupportRefresh" class="primary" type="button">Actualizar datos</button>
           <button id="btnForceReload" class="secondary danger" type="button">Forzar recarga</button>
+        </div>
         </div>
       </div>
     </div>
@@ -672,7 +712,7 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.1.18';
+  const APP_VERSION = '0.2.0';
 
   const FIREBASE_CONFIG = {
   "apiKey": "AIzaSyAuepS1cLPxfWAl_GBzGkTW_-tL64Vet1I",
@@ -683,10 +723,10 @@
   "appId": "1:766061685371:web:36d4914cd2d6f7761690de"
 };
   const FCM_VAPID_KEY = 'BB5V4X9xfGyERtIHOAy5Vkgi380cY0vYCJQqOIkm-5inP7Trw_g0PbLOYabm8oCNYD2dbvYBC6mNMNZ-3y19x0I';
-  const LS_USER    = 'retrochat_user_v0118';
+  const LS_USER    = 'retrochat_user_v020';
   const LS_INVITE  = 'retrochat_invite_v0112';
-  const LS_LASTSEQ  = 'retrochat_lastseq_v0118';
-  const LS_MSGS_PFX = 'retrochat_msgs_v0118_';
+  const LS_LASTSEQ  = 'retrochat_lastseq_v020';
+  const LS_MSGS_PFX = 'retrochat_msgs_v020_';
   const MAX_CACHED_MSGS = 120;
   // LS_UNREAD y LS_READSEQ eliminados: estado de lectura viene del backend v0.1.3
 
@@ -718,7 +758,7 @@
   // Distinto de activeContact (que persiste al volver a la lista).
   // Solo se llama markRead si isChatViewOpen === true.
   let isChatViewOpen = false;
-  let pushToken = localStorage.getItem('retrochat_push_token_v0118') || '';
+  let pushToken = localStorage.getItem('retrochat_push_token_v020') || '';
   let pushEnabled = !!pushToken;
 
   // ─── Audio (Web Audio API, sin archivos externos) ─────────────────────────
@@ -1524,6 +1564,7 @@
     $('supportSeq').textContent = activeChat ? String(lastSeqByChat[activeChat.chat_id] || 0) : '—';
     $('supportLastPoll').textContent = lastPollAt || '—';
     $('supportUnread').textContent = Object.values(unreadByContactId).reduce((a,b)=>a+Number(b||0),0);
+    initFirebaseMessaging();
     updatePushSupportUI();
     $('supportStatus').textContent = '';
     try {
@@ -1797,12 +1838,48 @@
     }
   }
 
+  let foregroundPushListenerReady = false;
+
   function initFirebaseMessaging(){
     if (!pushSupported()) return null;
 
     try {
       if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-      return firebase.messaging();
+      const messaging = firebase.messaging();
+
+      if (!foregroundPushListenerReady) {
+        foregroundPushListenerReady = true;
+
+        messaging.onMessage((payload) => {
+          console.log('FCM foreground', payload);
+
+          const n = payload.notification || {};
+          const d = payload.data || {};
+          const title = n.title || d.title || 'RetroChat';
+          const body = n.body || d.body || 'Nuevo mensaje';
+
+          if ($('supportPushFg')) {
+            $('supportPushFg').textContent = 'recibido · ' + new Date().toLocaleTimeString();
+          }
+
+          try { playIncomingSound && playIncomingSound(); } catch(err) {}
+          try { navigator.vibrate && navigator.vibrate([80, 60, 80]); } catch(err) {}
+
+          // En primer plano el navegador normalmente NO muestra notificación automática.
+          // La mostramos manualmente si el permiso ya está concedido.
+          if (Notification.permission === 'granted') {
+            try {
+              new Notification(title, {
+                body,
+                icon: './icon.svg',
+                badge: './icon.svg'
+              });
+            } catch(err) {}
+          }
+        });
+      }
+
+      return messaging;
     } catch(err) {
       console.warn('Firebase init error', err);
       return null;
@@ -1849,7 +1926,7 @@
 
       pushToken = token;
       pushEnabled = true;
-      localStorage.setItem('retrochat_push_token_v0118', token);
+      localStorage.setItem('retrochat_push_token_v020', token);
 
       await api('savePushToken', {
         usuario_id: me.id,
@@ -1881,7 +1958,7 @@
     }
   }
 
-  async function sendTestPush(){
+  async function sendTestPush(delayMs = 0){
     if (!me) {
       alert('Primero iniciá sesión.');
       return;
@@ -1892,14 +1969,17 @@
     }
 
     try {
-      $('supportStatus').textContent = 'Enviando prueba push...';
+      $('supportStatus').textContent = delayMs
+        ? 'Prueba programada. Mandá RetroChat a segundo plano ahora...'
+        : 'Enviando prueba push...';
 
       const r = await api('testPush', {
         usuario_id: me.id,
-        token: pushToken
+        token: pushToken,
+        delay_ms: delayMs
       });
 
-      $('supportStatus').textContent = 'Prueba enviada. Resultado backend: ' + (r.enviados || 0) + ' enviada(s). Probá con la app en segundo plano.';
+      $('supportStatus').textContent = 'Prueba enviada. Backend: ' + (r.enviados || 0) + ' enviada(s)' + (r.delay_ms ? ' con demora de ' + r.delay_ms + 'ms.' : '.') + ' Si estaba en primer plano, debería figurar en Push foreground.';
     } catch(err) {
       $('supportStatus').textContent = 'Error enviando prueba push: ' + (err.message || err);
     }
@@ -1918,8 +1998,14 @@
   $('btnSupport').addEventListener('click', openSupport);
   $('btnCloseSupport').addEventListener('click', closeSupport);
   $('supportWrap').addEventListener('click', (e) => { if (e.target === $('supportWrap')) closeSupport(); });
+  $('btnToggleDebug').addEventListener('click', () => {
+    const box = $('advancedDebug');
+    box.classList.toggle('show');
+    $('btnToggleDebug').textContent = box.classList.contains('show') ? 'Ocultar datos técnicos' : 'Mostrar datos técnicos';
+  });
   $('btnEnablePush').addEventListener('click', enablePushNotifications);
-  $('btnTestPush').addEventListener('click', sendTestPush);
+  $('btnTestPush').addEventListener('click', () => sendTestPush(0));
+  $('btnTestPushDelay').addEventListener('click', () => sendTestPush(8000));
   $('btnCopyPushToken').addEventListener('click', copyPushToken);
   $('btnSupportRefresh').addEventListener('click', () => refreshAppData(true).catch(err => $('supportStatus').textContent = err.message));
   $('btnForceReload').addEventListener('click', forceReloadApp);
