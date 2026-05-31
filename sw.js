@@ -31,7 +31,7 @@ try {
 }
 
 
-const CACHE = 'retrochat-v0-2-2';
+const CACHE = 'retrochat-v0-2-3';
 const ASSETS = ['./','./index.html','./manifest.json','./icon.svg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -52,15 +52,22 @@ self.addEventListener('fetch', e => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const targetUrl = event.notification && event.notification.data && event.notification.data.url
-    ? event.notification.data.url
-    : './';
+
+  const data = event.notification && event.notification.data ? event.notification.data : {};
+  const chatId = data.chat_id || '';
+  const targetUrl = data.url || (chatId ? './?open_chat=' + encodeURIComponent(chatId) : './');
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      // Preferimos una ventana RetroChat ya abierta.
       for (const client of clientList) {
-        if ('focus' in client) return client.focus();
+        if (client.url && client.url.includes(self.location.origin)) {
+          client.postMessage({ type: 'retrochat_open_chat', chat_id: chatId });
+          if ('focus' in client) return client.focus();
+          return;
+        }
       }
+
       if (clients.openWindow) return clients.openWindow(targetUrl);
     })
   );
