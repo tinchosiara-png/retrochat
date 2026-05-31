@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.1.11</title>
+  <title>RetroChat v0.1.12a</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -352,7 +352,7 @@
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.1.11 · Messenger vibes, moderno por dentro</small>
+        <small id="topVersion">v0.1.12 · Messenger vibes, moderno por dentro</small>
         <div class="header-actions">
           <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
           <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
@@ -510,7 +510,7 @@
       <div class="modal-body">
         <div class="support-grid">
           <div class="support-row"><b>App</b><span>RetroChat</span></div>
-          <div class="support-row"><b>Frontend</b><span id="supportFront">v0.1.11</span></div>
+          <div class="support-row"><b>Frontend</b><span id="supportFront">v0.1.12</span></div>
           <div class="support-row"><b>Backend</b><span id="supportBack">consultando...</span></div>
           <div class="support-row"><b>Usuario</b><span id="supportUser">—</span></div>
           <div class="support-row"><b>Chat activo</b><span id="supportChat">—</span></div>
@@ -531,12 +531,11 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.1.11';
-  const LS_USER     = 'retrochat_user_v0111';
-  const LS_INVITE   = 'retrochat_invite_v0111';
-  const LS_LASTSEQ  = 'retrochat_lastseq_v0111';
-  const LS_UNREAD   = 'retrochat_unread_v0111';
-  const LS_READSEQ  = 'retrochat_readseq_v0111';
+  const APP_VERSION = '0.1.12a';
+  const LS_USER    = 'retrochat_user_v0112a';
+  const LS_INVITE  = 'retrochat_invite_v0112';
+  const LS_LASTSEQ = 'retrochat_lastseq_v0112a';
+  // LS_UNREAD y LS_READSEQ eliminados: estado de lectura viene del backend v0.1.3
 
   const $ = (id) => document.getElementById(id);
 
@@ -546,8 +545,10 @@
   let activeChat = null;
   let messagesByChat = {};
   let chatByContactId = {};
-  let unreadByContactId = loadJson(LS_UNREAD, {});
-  let readSeqByChat     = loadJson(LS_READSEQ, {});
+  // unreadByContactId poblado por applyUnreadSummary_ desde backend
+  let unreadByContactId = {};
+  // notifiedSeqByChat: para no sonar dos veces el mismo mensaje
+  let notifiedSeqByChat = {};
   let lastSeqByChat     = loadJson(LS_LASTSEQ, {});
   let pollTimer = null;
   let heartbeatTimer = null;
@@ -555,6 +556,7 @@
   let lastPollAt = '';
   let pollingActive = false;
   let presencePollCount = 0;
+  let unreadPollCount = 0;
   let nudgeCooldown = false;
 
   // ─── Audio (Web Audio API, sin archivos externos) ─────────────────────────
@@ -798,23 +800,38 @@
     return (list || []).reduce((max,m) => Math.max(max, Number(m.seq || 0)), 0);
   }
 
-  function recomputeUnreadForContact(contactId){
-    const chat = chatByContactId[contactId];
-    if (!chat){ unreadByContactId[contactId] = 0; return 0; }
-    const chatId = chat.chat_id;
-    const readSeq = Number(readSeqByChat[chatId] || 0);
-    const msgs = (messagesByChat[chatId] || []).filter(m =>
-      !isNudgeMsg(m) && // nudges no cuentan como no leídos
-      m.usuario_id !== me.id &&
-      Number(m.seq || 0) > readSeq
-    );
-    unreadByContactId[contactId] = msgs.length;
-    return msgs.length;
-  }
+  // applyUnreadSummary_: recibe el array del backend y actualiza unreadByContactId
+  // Dispara sonido/notificación para chats con has_new_notif que aún no notificamos
+  // applyUnreadSummary_: recibe el array del backend y actualiza badges + dispara sonido.
+  // Usa s.ultimo_seq del propio summary — no depende de chatByContactId ni del caché local.
+  function applyUnreadSummary_(summary){
+    if (!summary || !summary.length) return;
+    summary.forEach(s => {
+      unreadByContactId[s.contact_id] = s.unread_count || 0;
 
-  function saveReadState(){
-    saveJson(LS_UNREAD, unreadByContactId);
-    saveJson(LS_READSEQ, readSeqByChat);
+      if (s.has_new_notif){
+        const chatId    = s.chat_id;
+        // s.ultimo_seq viene del backend — autocontenido, sin depender del caché local
+        const ultimoSeq = Number(s.ultimo_seq || 0);
+        const currentNotified = Number(notifiedSeqByChat[chatId] || 0);
+
+        if (ultimoSeq > currentNotified){
+          // No sonar si el chat está abierto ahora mismo
+          const esActivo = activeChat && activeChat.chat_id === chatId;
+          if (!esActivo){
+            const contacto = contacts.find(c => c.id === s.contact_id);
+            const nombre   = contacto ? (contacto.nombre || contacto.usuario || 'RetroChat') : 'RetroChat';
+            playSoundIncoming();
+            vibrate([60]);
+            showNotification(nombre, s.unread_count + ' mensaje(s) sin leer');
+            // Marcar notified en backend usando el seq del summary — sin ambigüedad
+            api('markNotified', { usuario_id: me.id, chat_id: chatId, seq: ultimoSeq }).catch(()=>{});
+            notifiedSeqByChat[chatId] = ultimoSeq;
+          }
+        }
+      }
+    });
+    renderContacts();
   }
 
   // ─── Render ───────────────────────────────────────────────────────────────
@@ -911,11 +928,12 @@
 
     await loadMessages({ full:true });
 
-    // Marcar como leído: readSeq = último seq real descargado
+    // Marcar como leído en backend
     const currentMax = maxSeqOf(messagesByChat[chatId]);
-    readSeqByChat[chatId] = currentMax;
+    if (currentMax > 0){
+      api('markRead', { usuario_id: me.id, chat_id: chatId, seq: currentMax }).catch(()=>{});
+    }
     unreadByContactId[c.id] = 0;
-    saveReadState();
     renderContacts();
 
     startPolling();
@@ -963,18 +981,17 @@
     saveJson(LS_LASTSEQ, lastSeqByChat);
     $('chatSeq').textContent = 'seq: ' + nextLastSeq;
 
-    // Mensajes nuevos del otro: sonido, notificación, nudge
+    // Mensajes nuevos del otro mientras el chat está abierto: sonido/nudge
+    // El sonido de chats en segundo plano lo maneja applyUnreadSummary_
     if (!opts.full && newMax > previousMax){
       const nuevos = (messagesByChat[chatId] || []).filter(m =>
         Number(m.seq || 0) > previousMax && m.usuario_id !== me.id
       );
       if (nuevos.length){
-        const hayNudge = nuevos.some(isNudgeMsg);
+        const hayNudge  = nuevos.some(isNudgeMsg);
         const hayMensaje = nuevos.some(m => !isNudgeMsg(m));
 
-        if (hayNudge){
-          triggerNudgeEffect(activeContact ? activeContact.nombre : '');
-        }
+        if (hayNudge) triggerNudgeEffect(activeContact ? activeContact.nombre : '');
         if (hayMensaje){
           playSoundIncoming();
           vibrate([60]);
@@ -987,11 +1004,10 @@
       }
     }
 
-    // Si el chat está abierto, marcar todo como leído
-    if (activeChat && activeChat.chat_id === chatId && activeContact){
-      readSeqByChat[chatId] = newMax;
+    // Si el chat está abierto, marcar como leído en backend
+    if (activeChat && activeChat.chat_id === chatId && activeContact && newMax > 0){
+      api('markRead', { usuario_id: me.id, chat_id: chatId, seq: newMax }).catch(()=>{});
       unreadByContactId[activeContact.id] = 0;
-      saveReadState();
       renderContacts();
     }
 
@@ -1019,105 +1035,14 @@
   // FIX: inicializa readSeq al ultimo_seq actual del chat (no en 0)
   // FIX: usa since_seq incremental en lugar de always 0
 
-  async function initChatForContact(c){
-    let chat = chatByContactId[c.id];
-    if (!chat){
-      const rChat = await api('createOrGetDirectChat', { usuario_id: me.id, contacto_id: c.id });
-      chat = rChat.chat;
-      chatByContactId[c.id] = chat;
-    }
-    return chat;
-  }
-
-  async function baselineUnreadContacts(){
-    // Corre una sola vez al iniciar sesión.
-    // Para chats nunca vistos: readSeq = ultimo_seq del chat (no hay pendientes de antes).
-    // Para chats ya conocidos: respeta el readSeq guardado en LS.
-    if (!me || !contacts.length) return;
-
-    for (const c of contacts){
-      try {
-        const chat = await initChatForContact(c);
-        const chatId = chat.chat_id;
-
-        if (readSeqByChat[chatId] === undefined || readSeqByChat[chatId] === null){
-          // Primera vez que vemos este chat: baseline al seq actual, sin marcar nada como no leído
-          const remoteSeq = Number(chat.ultimo_seq || 0);
-          readSeqByChat[chatId] = remoteSeq;
-          lastSeqByChat[chatId] = remoteSeq;
-          unreadByContactId[c.id] = 0;
-        }
-        // Si ya existe readSeq, no tocamos nada; el scanUnread lo va a computar
-      } catch(err){}
-    }
-
-    saveReadState();
-    saveJson(LS_LASTSEQ, lastSeqByChat);
-    renderContacts();
-  }
-
-  async function scanUnreadContacts(){
-    // Revisa mensajes nuevos en chats no activos usando since_seq incremental.
-    if (!me || !contacts.length) return;
-
-    for (const c of contacts){
-      // No escanear el chat abierto; loadMessages lo maneja
-      if (activeContact && activeContact.id === c.id) continue;
-
-      try {
-        const chat = await initChatForContact(c);
-        const chatId = chat.chat_id;
-
-        const sinceSeq = Number(lastSeqByChat[chatId] || readSeqByChat[chatId] || 0);
-
-        // NO usamos chat.ultimo_seq cacheado para decidir el skip:
-        // chatByContactId queda en memoria y ultimo_seq puede estar viejo.
-        // Siempre pedimos al backend con since_seq incremental.
-        // TODO: optimizar con endpoint getChatsSummary cuando el volumen lo justifique.
-
-        const r = await api('getMessages', {
-          chat_id: chatId,
-          usuario_id: me.id,
-          since_seq: sinceSeq,
-          limit: 30
-        });
-
-        const msgs = r.mensajes || [];
-        if (!msgs.length) continue;
-
-        // Mergear sin pisar mensajes del chat activo
-        const existing = messagesByChat[chatId] || [];
-        const seen = new Set(existing.map(m => m.id));
-        msgs.forEach(m => { if (!seen.has(m.id)) existing.push(m); });
-        existing.sort((a,b) => Number(a.seq||0) - Number(b.seq||0));
-        messagesByChat[chatId] = existing.slice(-150);
-
-        const newMax = maxSeqOf(messagesByChat[chatId]);
-        lastSeqByChat[chatId] = newMax;
-
-        // Sonido/notificación por mensajes en chats no abiertos
-        const hayNudge = msgs.some(m => isNudgeMsg(m) && m.usuario_id !== me.id);
-        const hayMensaje = msgs.some(m => !isNudgeMsg(m) && m.usuario_id !== me.id);
-
-        if (hayNudge) triggerNudgeEffect(c.nombre || c.usuario || '');
-        if (hayMensaje){
-          playSoundIncoming();
-          vibrate([60]);
-          const ultimo = msgs.filter(m => !isNudgeMsg(m) && m.usuario_id !== me.id).pop();
-          showNotification(
-            c.nombre || c.usuario || 'RetroChat',
-            ultimo ? ultimo.texto : 'Nuevo mensaje'
-          );
-        }
-
-        recomputeUnreadForContact(c.id);
-        saveReadState();
-        saveJson(LS_LASTSEQ, lastSeqByChat);
-
-      } catch(err){}
-    }
-
-    renderContacts();
+  // fetchUnreadSummary_: pide al backend el resumen de no leídos y aplica
+  // Es la única fuente de verdad para badges y sonidos de chats en segundo plano
+  async function fetchUnreadSummary_(){
+    if (!me) return;
+    try {
+      const r = await api('getUnreadSummary', { usuario_id: me.id });
+      applyUnreadSummary_(r.unread_summary || []);
+    } catch(err){}
   }
 
   // ─── Polling ──────────────────────────────────────────────────────────────
@@ -1130,18 +1055,25 @@
       if (!pollingActive) return;
       if (me){
         try {
+          // Poll de mensajes del chat activo (rápido: 3s visible, 15s oculto)
           if (activeChat) await loadMessages({ full:false });
 
+          // Poll de presencia (cada 2 ticks)
           presencePollCount++;
-          await scanUnreadContacts().catch(()=>{});
-
           if (presencePollCount >= 2){
             presencePollCount = 0;
             await refreshContacts().catch(()=>{});
           }
+
+          // Poll de no leídos desde backend (cada 5 ticks ≈ 15s visible)
+          unreadPollCount++;
+          if (unreadPollCount >= 5){
+            unreadPollCount = 0;
+            await fetchUnreadSummary_().catch(()=>{});
+          }
         } catch(err){}
       }
-      const delay = document.hidden ? 15000 : 3000;
+      const delay = document.hidden ? 20000 : 3000;
       pollTimer = setTimeout(tick, delay);
     };
 
@@ -1174,7 +1106,7 @@
       if (activeChat) await loadMessages({ full:true });
       else {
         await refreshContacts().catch(()=>{});
-        await scanUnreadContacts().catch(()=>{});
+        await fetchUnreadSummary_().catch(()=>{});
       }
       startPolling();
     } catch(err){}
@@ -1335,7 +1267,8 @@
       saveSession(me);
       setStatus($('authStatus'), '');
       showApp();
-      await baselineUnreadContacts().catch(()=>{});
+      // El backend ya devuelve el summary en el login — aplicar directo
+      applyUnreadSummary_(r.unread_summary || []);
     } catch(err){ setStatus($('authStatus'), err.message); }
   }
 
@@ -1357,7 +1290,7 @@
       setStatus($('authStatus'), '');
       showApp();
       await refreshContacts().catch(()=>{});
-      await baselineUnreadContacts().catch(()=>{});
+      // cuenta nueva: no hay no leídos
     } catch(err){ setStatus($('authStatus'), err.message); }
   }
 
@@ -1386,10 +1319,8 @@
   $('btnLogout').addEventListener('click', () => {
     clearSession();
     me=null; contacts=[]; activeContact=null; activeChat=null;
-    messagesByChat={}; chatByContactId={}; unreadByContactId={}; readSeqByChat={};
+    messagesByChat={}; chatByContactId={}; unreadByContactId={}; notifiedSeqByChat={};
     lastSeqByChat={};
-    saveJson(LS_UNREAD, {});
-    saveJson(LS_READSEQ, {});
     saveJson(LS_LASTSEQ, {});
     showAuth();
   });
@@ -1424,7 +1355,7 @@
   if (cached && cached.id){
     me = cached;
     showApp();
-    refreshContacts().then(() => baselineUnreadContacts()).catch(() => {});
+    refreshContacts().then(() => fetchUnreadSummary_()).catch(() => {});
   } else {
     showAuth();
   }

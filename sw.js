@@ -1,14 +1,8 @@
-const CACHE = 'retrochat-v0-1-11';
+const CACHE = 'retrochat-v0-1-12a';
 const ASSETS = ['./','./index.html','./manifest.json','./icon.svg'];
-
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE)
-      .then(c => c.addAll(ASSETS))
-      .then(() => self.skipWaiting())
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
-
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
@@ -16,11 +10,8 @@ self.addEventListener('activate', e => {
       .then(() => self.clients.claim())
   );
 });
-
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (url.origin.includes('script.google.com') || url.origin.includes('script.googleusercontent.com')) return;
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
-  );
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });
