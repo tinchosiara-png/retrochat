@@ -9,16 +9,16 @@ try {
   // v0.2.1: FCM data-only. Este SW muestra la única notificación visible.
   messaging.onBackgroundMessage((payload) => {
     const data = payload && payload.data ? payload.data : {};
-    const notification = payload && payload.notification ? payload.notification : {};
-
-    const title = notification.title || data.title || 'RetroChat';
-    const body = notification.body || data.body || 'Nuevo mensaje';
+    const title = data.title || 'RetroChat';
+    const body = data.body || 'Nuevo mensaje';
     const icon = data.icon || './icon.svg';
 
     self.registration.showNotification(title, {
       body,
       icon,
       badge: './icon.svg',
+      tag: data.chat_id ? 'retrochat-' + data.chat_id : 'retrochat',
+      renotify: true,
       vibrate: data.tipo === 'zumbido' ? [120,80,120,80,120] : [80],
       data: {
         url: data.url || './',
@@ -31,7 +31,7 @@ try {
 }
 
 
-const CACHE = 'retrochat-v0-2-1';
+const CACHE = 'retrochat-v0-2-2';
 const ASSETS = ['./','./index.html','./manifest.json','./icon.svg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

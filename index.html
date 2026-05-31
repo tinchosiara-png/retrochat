@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.2.1 Push Beta</title>
+  <title>RetroChat v0.2.2 Push Chat</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -298,14 +298,16 @@
     .modal-wrap{
       position:fixed;inset:0;background:rgba(0,18,45,.35);
       display:none;place-items:center;padding:14px;z-index:10;
+      overflow:auto;
     }
     .modal-wrap.show{display:grid}
     .modal{
       width:min(440px,100%);background:#eef8ff;border:1px solid #0755a0;
       border-radius:16px;overflow:hidden;box-shadow:var(--shadow);
+      max-height:92dvh;display:flex;flex-direction:column;
     }
     .modal .titlebar{min-height:36px}
-    .modal-body{padding:16px}
+    .modal-body{padding:16px;overflow:auto;-webkit-overflow-scrolling:touch}
     .row{display:flex;gap:8px}
     .row > *{flex:1}
     .linkbox{
@@ -353,15 +355,6 @@
       background:#fff;
     }
     .support-row b{color:#164a7f}
-    .support-actions{
-      display:flex;
-      gap:8px;
-      margin-top:12px;
-    }
-    .support-actions button{flex:1}
-
-
-
     .support-section-title{
       margin:14px 2px 7px;
       font-size:12px;
@@ -441,6 +434,15 @@
     }
     .backbtn{display:none}
   </style>
+
+  <meta name="description" content="RetroChat: mensajería retro, simple y rápida.">
+  <meta property="og:title" content="RetroChat">
+  <meta property="og:description" content="Conectado como en 2004, funcionando como en 2026.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tinchosiara-png.github.io/retrochat/">
+  <meta property="og:image" content="https://tinchosiara-png.github.io/retrochat/retrochat-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+
 </head>
 <body>
   <div class="app">
@@ -448,7 +450,7 @@
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.2.1 · Push Beta</small>
+        <small id="topVersion">v0.2.2 · Push Chat</small>
         <div class="header-actions">
           <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
           <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
@@ -594,8 +596,9 @@
           </div>
           <div class="row">
             <button id="btnFindPhone" class="primary" type="button">Buscar</button>
-            <button id="btnInvite" class="secondary" type="button">Invitar WhatsApp</button>
+            <button id="btnInvite" class="secondary" type="button">Invitar a este número</button>
           </div>
+          <button id="btnInviteAny" class="secondary" type="button" style="width:100%;margin-top:8px">Compartir invitación por WhatsApp</button>
         </div>
 
         <div id="findUserBox" style="display:none">
@@ -671,7 +674,7 @@
         <div class="support-grid">
           <div class="support-section-title">Estado general</div>
           <div class="support-row"><b>App</b><span>RetroChat</span></div>
-          <div class="support-row"><b>Versión</b><span id="supportFront">v0.2.1 Push Beta</span></div>
+          <div class="support-row"><b>Versión</b><span id="supportFront">v0.2.2 Push Chat</span></div>
           <div class="support-row"><b>Backend</b><span id="supportBack">consultando...</span></div>
           <div class="support-row"><b>Usuario</b><span id="supportUser">—</span></div>
 
@@ -689,16 +692,16 @@
             <div class="support-row"><b>No leídos</b><span id="supportUnread">—</span></div>
             <div class="support-row"><b>Token push</b><span id="supportPushToken">—</span></div>
             <div class="support-row"><b>Push foreground</b><span id="supportPushFg">esperando</span></div>
-            <div class="support-row"><b>Cache</b><span>retrochat-v0-2-1</span></div>
+            <div class="support-row"><b>Cache</b><span>retrochat-v0-2-2</span></div>
           </div>
         </div>
         <div id="supportStatus" class="status"></div>
         <div class="support-actions">
           <div class="support-actions">
           <button id="btnEnablePush" class="primary" type="button">Activar notificaciones</button>
-          <button id="btnTestPushDelay" class="secondary" type="button">Prueba en 8s</button>
-          <button id="btnTestPush" class="secondary" type="button">Enviar prueba push</button>
-          <button id="btnSupportRefresh" class="secondary" type="button">Actualizar datos</button>
+          <button id="btnTestPushDelay" class="secondary" type="button">Probar en 8s</button>
+          <button id="btnTestPush" class="secondary" type="button">Probar ahora</button>
+          <button id="btnSupportRefresh" class="secondary" type="button">Actualizar</button>
           <button id="btnCopyPushToken" class="secondary" type="button">Copiar token</button>
           <button id="btnForceReload" class="secondary danger" type="button">Forzar recarga</button>
         </div>
@@ -712,7 +715,7 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.2.1';
+  const APP_VERSION = '0.2.2';
 
   const FIREBASE_CONFIG = {
   "apiKey": "AIzaSyAuepS1cLPxfWAl_GBzGkTW_-tL64Vet1I",
@@ -723,10 +726,10 @@
   "appId": "1:766061685371:web:36d4914cd2d6f7761690de"
 };
   const FCM_VAPID_KEY = 'BB5V4X9xfGyERtIHOAy5Vkgi380cY0vYCJQqOIkm-5inP7Trw_g0PbLOYabm8oCNYD2dbvYBC6mNMNZ-3y19x0I';
-  const LS_USER    = 'retrochat_user_v021';
+  const LS_USER    = 'retrochat_user_v022';
   const LS_INVITE  = 'retrochat_invite_v0112';
-  const LS_LASTSEQ  = 'retrochat_lastseq_v021';
-  const LS_MSGS_PFX = 'retrochat_msgs_v021_';
+  const LS_LASTSEQ  = 'retrochat_lastseq_v022';
+  const LS_MSGS_PFX = 'retrochat_msgs_v022_';
   const MAX_CACHED_MSGS = 120;
   // LS_UNREAD y LS_READSEQ eliminados: estado de lectura viene del backend v0.1.3
 
@@ -758,7 +761,7 @@
   // Distinto de activeContact (que persiste al volver a la lista).
   // Solo se llama markRead si isChatViewOpen === true.
   let isChatViewOpen = false;
-  let pushToken = localStorage.getItem('retrochat_push_token_v021') || '';
+  let pushToken = localStorage.getItem('retrochat_push_token_v022') || '';
   let pushEnabled = !!pushToken;
 
   // ─── Audio (Web Audio API, sin archivos externos) ─────────────────────────
@@ -1711,16 +1714,25 @@
     } catch(err){ setStatus($('modalStatus'), err.message); }
   }
 
-  async function inviteWhatsApp(){
-    const phone = $('contactPhone').value.trim();
-    setStatus($('modalStatus'), 'Creando invitación...');
+  async function inviteWhatsApp(anyContact = false){
+    const phone = anyContact ? '' : $('contactPhone').value.trim();
+    setStatus($('modalStatus'), anyContact ? 'Creando invitación general...' : 'Creando invitación...');
     try {
       const r = await api('createInvite', { creado_por: me.id, telefono_destino: phone });
       const box = $('inviteBox');
+      const waUrl = anyContact ? (r.whatsapp_share_url || '') : (r.whatsapp_url || r.whatsapp_share_url || '');
+
       box.style.display = 'block';
-      box.innerHTML = '<b>Invitación lista:</b><br>' + escapeHtml(r.invite_url || '') + '<br><br><b>WhatsApp:</b><br>' + escapeHtml(r.whatsapp_url || '');
-      setStatus($('modalStatus'), 'Abrí WhatsApp para enviar la invitación.');
-      if (r.whatsapp_url) window.open(r.whatsapp_url, '_blank');
+      box.innerHTML =
+        '<b>Invitación lista:</b><br>' + escapeHtml(r.invite_url || '') +
+        '<br><br><b>WhatsApp:</b><br>' + escapeHtml(waUrl || '');
+
+      setStatus($('modalStatus'), anyContact
+        ? 'Elegí el contacto en WhatsApp y enviá la invitación.'
+        : 'Abrí WhatsApp para enviar la invitación.'
+      );
+
+      if (waUrl) window.open(waUrl, '_blank');
     } catch(err){ setStatus($('modalStatus'), err.message); }
   }
 
@@ -1926,7 +1938,7 @@
 
       pushToken = token;
       pushEnabled = true;
-      localStorage.setItem('retrochat_push_token_v021', token);
+      localStorage.setItem('retrochat_push_token_v022', token);
 
       await api('savePushToken', {
         usuario_id: me.id,
@@ -2046,7 +2058,8 @@
   $('btnReloadGuide').addEventListener('click', () => loadPublicGuide().catch(err => setStatus($('modalStatus'), err.message)));
   $('btnFindPhone').addEventListener('click', findContactByPhone);
   $('btnFindUser').addEventListener('click', findContactByUser);
-  $('btnInvite').addEventListener('click', inviteWhatsApp);
+  $('btnInvite').addEventListener('click', () => inviteWhatsApp(false));
+  $('btnInviteAny').addEventListener('click', () => inviteWhatsApp(true));
   $('btnSend').addEventListener('click', sendMessage);
   $('btnNudge').addEventListener('click', sendNudge);
   $('btnBack').addEventListener('click', () => { $('shell').classList.remove('chat-open'); isChatViewOpen = false; });
