@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.2.6 Push Chat</title>
+  <title>RetroChat v0.2.7 Push Chat</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -474,7 +474,7 @@
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.2.6 · Push Chat</small>
+        <small id="topVersion">v0.2.7 · Push Chat</small>
         <div class="header-actions">
           <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
           <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
@@ -705,7 +705,7 @@
         <div class="support-grid">
           <div class="support-section-title">Estado general</div>
           <div class="support-row"><b>App</b><span>RetroChat</span></div>
-          <div class="support-row"><b>Versión</b><span id="supportFront">v0.2.6 Push Chat</span></div>
+          <div class="support-row"><b>Versión</b><span id="supportFront">v0.2.7 Push Chat</span></div>
           <div class="support-row"><b>Backend</b><span id="supportBack">consultando...</span></div>
           <div class="support-row"><b>Usuario</b><span id="supportUser">—</span></div>
 
@@ -723,19 +723,17 @@
             <div class="support-row"><b>No leídos</b><span id="supportUnread">—</span></div>
             <div class="support-row"><b>Token push</b><span id="supportPushToken">—</span></div>
             <div class="support-row"><b>Push foreground</b><span id="supportPushFg">esperando</span></div>
-            <div class="support-row"><b>Cache</b><span>retrochat-v0-2-6</span></div>
+            <div class="support-row"><b>Cache</b><span>retrochat-v0-2-7</span></div>
           </div>
         </div>
         <div id="supportStatus" class="status"></div>
         <div class="support-actions">
-          <div class="support-actions">
           <button id="btnEnablePush" class="primary" type="button">Activar notificaciones</button>
           <button id="btnTestPushDelay" class="secondary" type="button">Probar en 8s</button>
           <button id="btnTestPush" class="secondary" type="button">Probar ahora</button>
           <button id="btnSupportRefresh" class="secondary" type="button">Actualizar</button>
           <button id="btnCopyPushToken" class="secondary" type="button">Copiar token</button>
           <button id="btnForceReload" class="secondary danger" type="button">Forzar recarga</button>
-        </div>
         </div>
       </div>
     </div>
@@ -746,7 +744,7 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.2.6';
+  const APP_VERSION = '0.2.7';
 
   const FIREBASE_CONFIG = {
   "apiKey": "AIzaSyAuepS1cLPxfWAl_GBzGkTW_-tL64Vet1I",
@@ -801,7 +799,7 @@
       return false;
     });
   }
-  const LS_PENDING_OPEN_CHAT = 'retrochat_pending_open_chat_v024';
+  const LS_PENDING_OPEN_CHAT = 'retrochat_pending_open_chat_v027';
   let pushEnabled = !!pushToken;
 
   // ─── Audio (Web Audio API, sin archivos externos) ─────────────────────────
@@ -1687,6 +1685,9 @@
     $('supportUnread').textContent = Object.values(unreadByContactId).reduce((a,b)=>a+Number(b||0),0);
     initFirebaseMessaging();
     updatePushSupportUI();
+    if (Notification.permission === 'granted') {
+      ensurePushReadySilent('support');
+    }
     $('supportStatus').textContent = '';
     try {
       const r = await api('ping', {});
@@ -1906,6 +1907,7 @@
       saveSession(me);
       setStatus($('authStatus'), '');
       showApp();
+      ensurePushReadySilent('startup');
       processPendingOpenChat();
       // El backend ya devuelve el summary en el login — aplicar directo
       applyUnreadSummary_(r.unread_summary || []);
@@ -1931,6 +1933,7 @@
       setStatus($('authStatus'), '');
       showApp();
       await refreshContacts().catch(()=>{});
+      if (Notification.permission === 'granted') ensurePushReadySilent('startup');
       if ($('regEnablePush') && $('regEnablePush').checked) {
         setTimeout(() => enablePushNotifications().catch(()=>{}), 500);
       }
@@ -1970,6 +1973,7 @@
       me = r.usuario;
       saveSession(me);
       showApp();
+      ensurePushReadySilent('startup');
       setStatus($('settingsStatus'), 'Configuración guardada.');
     } catch(err) {
       setStatus($('settingsStatus'), err.message);
@@ -2051,6 +2055,57 @@
     }
   }
 
+
+  async function ensurePushReadySilent(reason = 'auto'){
+    // Si el permiso ya está concedido, no alcanza con tener "un token" guardado:
+    // tras updates, cambio de SW o token viejo, puede figurar activo pero no llegar nada.
+    // Esta función revalida token FCM y lo vuelve a guardar en backend sin pedir permiso.
+    if (!me || !me.id) return false;
+    if (!pushSupported()) return false;
+    if (Notification.permission !== 'granted') {
+      updatePushSupportUI();
+      return false;
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.register('./sw.js');
+      const messaging = initFirebaseMessaging();
+      if (!messaging) return false;
+
+      const token = await messaging.getToken({
+        vapidKey: FCM_VAPID_KEY,
+        serviceWorkerRegistration: registration
+      });
+
+      if (!token) return false;
+
+      pushToken = token;
+      pushEnabled = true;
+      localStorage.setItem('retrochat_push_token', token);
+
+      // Re-guardar siempre: si la hoja perdió/tenía viejo el token, se autocura.
+      await api('savePushToken', {
+        usuario_id: me.id,
+        token: token,
+        plataforma: 'web'
+      });
+
+      if ($('supportStatus') && reason !== 'startup') {
+        $('supportStatus').textContent = 'Notificaciones verificadas y sincronizadas.';
+      }
+      updatePushSupportUI();
+      return true;
+    } catch(err) {
+      console.warn('ensurePushReadySilent failed', err);
+      if ($('supportStatus') && reason !== 'startup') {
+        $('supportStatus').textContent = 'No pude verificar push: ' + (err.message || err);
+      }
+      updatePushSupportUI();
+      return false;
+    }
+  }
+
+
   async function enablePushNotifications(){
     if (!me) {
       alert('Primero iniciá sesión.');
@@ -2127,6 +2182,9 @@
     if (!me) {
       alert('Primero iniciá sesión.');
       return;
+    }
+    if (!pushToken && Notification.permission === 'granted') {
+      await ensurePushReadySilent('test');
     }
     if (!pushToken) {
       alert('Primero tocá Activar notificaciones.');
@@ -2247,6 +2305,7 @@
   if (cached && cached.id){
     me = cached;
     showApp();
+    ensurePushReadySilent('startup');
     // Mostrar contactos cacheados si hay
     const cachedContacts = loadJson('retrochat_contacts_v0112c', []);
     if (cachedContacts.length){

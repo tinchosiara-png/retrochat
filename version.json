@@ -1,6 +1,6 @@
 {
-  "frontend": "0.2.6",
-  "cache": "retrochat-v0-2-6",
+  "frontend": "0.2.7",
+  "cache": "retrochat-v0-2-7",
   "required": false,
   "message": "Nueva versión disponible"
 }
