@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.2.5 Push Chat</title>
+  <title>RetroChat v0.2.6 Push Chat</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -134,6 +134,30 @@
     }
     .danger{border-color:#df8f8f;background:linear-gradient(#fff,#ffe1e1);color:#9b1c1c}
     .status{margin-top:12px;min-height:19px;font-size:12px;color:#164a7f;text-align:center}
+
+    .update-banner{
+      display:none;
+      margin:8px 10px 0;
+      padding:9px 10px;
+      border:1px solid #d5b33e;
+      background:linear-gradient(#fff8c9,#ffe889);
+      color:#4b3a00;
+      border-radius:12px;
+      box-shadow:0 2px 8px rgba(80,60,0,.12);
+      font-size:13px;
+      align-items:center;
+      gap:8px;
+    }
+    .update-banner.show{display:flex}
+    .update-banner button{
+      margin-left:auto;
+      width:auto;
+      min-height:32px;
+      padding:6px 10px;
+      font-size:12px;
+      border-radius:9px;
+    }
+
     .shell{flex:1;min-height:0;display:none;width:100%}
     .shell.active{display:flex}
     .sidebar{
@@ -450,7 +474,7 @@
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.2.5 · Push Chat</small>
+        <small id="topVersion">v0.2.6 · Push Chat</small>
         <div class="header-actions">
           <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
           <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
@@ -681,7 +705,7 @@
         <div class="support-grid">
           <div class="support-section-title">Estado general</div>
           <div class="support-row"><b>App</b><span>RetroChat</span></div>
-          <div class="support-row"><b>Versión</b><span id="supportFront">v0.2.5 Push Chat</span></div>
+          <div class="support-row"><b>Versión</b><span id="supportFront">v0.2.6 Push Chat</span></div>
           <div class="support-row"><b>Backend</b><span id="supportBack">consultando...</span></div>
           <div class="support-row"><b>Usuario</b><span id="supportUser">—</span></div>
 
@@ -699,7 +723,7 @@
             <div class="support-row"><b>No leídos</b><span id="supportUnread">—</span></div>
             <div class="support-row"><b>Token push</b><span id="supportPushToken">—</span></div>
             <div class="support-row"><b>Push foreground</b><span id="supportPushFg">esperando</span></div>
-            <div class="support-row"><b>Cache</b><span>retrochat-v0-2-5</span></div>
+            <div class="support-row"><b>Cache</b><span>retrochat-v0-2-6</span></div>
           </div>
         </div>
         <div id="supportStatus" class="status"></div>
@@ -722,7 +746,7 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.2.5';
+  const APP_VERSION = '0.2.6';
 
   const FIREBASE_CONFIG = {
   "apiKey": "AIzaSyAuepS1cLPxfWAl_GBzGkTW_-tL64Vet1I",
@@ -967,14 +991,41 @@
     return new Date().toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
   }
 
+  function formatChatDate(value){
+    if (!value) return '';
+    const d = parseBackendDate(value);
+    if (!d) return String(value);
+
+    const today = new Date();
+    const sameDay =
+      d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate();
+
+    const time = d.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
+    if (sameDay) return time;
+
+    const date = d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' });
+    return date + ' ' + time;
+  }
+
   function parseBackendDate(value){
     if (!value) return null;
     if (value instanceof Date) return value;
     const s = String(value).trim();
+
+    // Si viene ISO con Z o zona horaria, respetar esa zona y mostrar en hora local.
+    if (/T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:?\d{2})$/.test(s)) {
+      const dIso = new Date(s);
+      return isNaN(dIso.getTime()) ? null : dIso;
+    }
+
+    // Si viene de Apps Script/Sheet como texto simple, tratarlo como hora local argentina.
     const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
     if (m) {
       return new Date(Number(m[1]), Number(m[2])-1, Number(m[3]), Number(m[4]), Number(m[5]), Number(m[6]));
     }
+
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
   }
@@ -1270,7 +1321,7 @@
       const div = document.createElement('div');
       const sending = m.estado === 'enviando';
       const failed = m.estado === 'error' || m.error;
-      const stateText = failed ? 'No enviado' : (sending ? 'Enviando...' : ('#' + escapeHtml(String(m.seq || '')) + ' · ' + escapeHtml(m.fecha || '')));
+      const stateText = failed ? 'No enviado' : (sending ? 'Enviando...' : ('#' + escapeHtml(String(m.seq || '')) + ' · ' + escapeHtml(formatChatDate(m.fecha))));
       const stateClass = failed ? ' error' : (sending ? ' sending' : '');
 
       if (isNudgeMsg(m)){
@@ -1662,6 +1713,37 @@
     } catch(err){}
     location.replace(location.origin + location.pathname + '?v=' + Date.now());
   }
+
+
+  async function applyUpdateNow(){
+    try {
+      const el = $('updateText');
+      if (el) el.textContent = 'Actualizando RetroChat...';
+      await forceReloadApp();
+    } catch(err) {
+      location.reload();
+    }
+  }
+
+  async function checkForUpdates(){
+    try {
+      const res = await fetch('./version.json?t=' + Date.now(), { cache:'no-store' });
+      if (!res.ok) return;
+      const info = await res.json();
+      const remote = String(info.frontend || '').trim();
+      const current = String(APP_VERSION || '').trim();
+
+      if (remote && remote !== current) {
+        const banner = $('updateBanner');
+        const text = $('updateText');
+        if (text) text.textContent = info.message || ('Nueva versión disponible: v' + remote);
+        if (banner) banner.classList.add('show');
+      }
+    } catch(err) {
+      // Silencioso: si falla no molestamos al usuario.
+    }
+  }
+
 
   // ─── Modal agregar contacto ───────────────────────────────────────────────
 
@@ -2143,7 +2225,11 @@
   window.addEventListener('pageshow', () => wakeAndRefresh());
 
   if ('serviceWorker' in navigator){
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+      checkForUpdates();
+      setInterval(checkForUpdates, 10 * 60 * 1000);
+    });
     navigator.serviceWorker.addEventListener('message', (event) => {
       const data = event.data || {};
       if (data.type === 'retrochat_open_chat' && data.chat_id) {
