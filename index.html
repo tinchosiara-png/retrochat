@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.1.17 Push Beta</title>
+  <title>RetroChat v0.1.18 Push Test</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -421,7 +421,7 @@
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.1.17 · Push Beta</small>
+        <small id="topVersion">v0.1.18 · Push Test</small>
         <div class="header-actions">
           <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
           <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
@@ -643,7 +643,7 @@
       <div class="modal-body">
         <div class="support-grid">
           <div class="support-row"><b>App</b><span>RetroChat</span></div>
-          <div class="support-row"><b>Frontend</b><span id="supportFront">v0.1.17 Push Beta</span></div>
+          <div class="support-row"><b>Frontend</b><span id="supportFront">v0.1.18 Push Test</span></div>
           <div class="support-row"><b>Heartbeat como</b><span id="supportHbUser">—</span></div>
           <div class="support-row"><b>Backend</b><span id="supportBack">consultando...</span></div>
           <div class="support-row"><b>Usuario</b><span id="supportUser">—</span></div>
@@ -653,11 +653,12 @@
           <div class="support-row"><b>No leídos</b><span id="supportUnread">—</span></div>
           <div class="support-row"><b>Push</b><span id="supportPush">sin activar</span></div>
           <div class="support-row"><b>Token push</b><span id="supportPushToken">—</span></div>
-          <div class="support-row"><b>Cache</b><span>retrochat-v0-1-17</span></div>
+          <div class="support-row"><b>Cache</b><span>retrochat-v0-1-18</span></div>
         </div>
         <div id="supportStatus" class="status"></div>
         <div class="support-actions">
           <button id="btnEnablePush" class="primary" type="button">Activar notificaciones</button>
+          <button id="btnTestPush" class="secondary" type="button">Enviar prueba push</button>
           <button id="btnCopyPushToken" class="secondary" type="button">Copiar token</button>
           <button id="btnSupportRefresh" class="primary" type="button">Actualizar datos</button>
           <button id="btnForceReload" class="secondary danger" type="button">Forzar recarga</button>
@@ -671,7 +672,7 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.1.17';
+  const APP_VERSION = '0.1.18';
 
   const FIREBASE_CONFIG = {
   "apiKey": "AIzaSyAuepS1cLPxfWAl_GBzGkTW_-tL64Vet1I",
@@ -682,10 +683,10 @@
   "appId": "1:766061685371:web:36d4914cd2d6f7761690de"
 };
   const FCM_VAPID_KEY = 'BB5V4X9xfGyERtIHOAy5Vkgi380cY0vYCJQqOIkm-5inP7Trw_g0PbLOYabm8oCNYD2dbvYBC6mNMNZ-3y19x0I';
-  const LS_USER    = 'retrochat_user_v0117';
+  const LS_USER    = 'retrochat_user_v0118';
   const LS_INVITE  = 'retrochat_invite_v0112';
-  const LS_LASTSEQ  = 'retrochat_lastseq_v0117';
-  const LS_MSGS_PFX = 'retrochat_msgs_v0117_';
+  const LS_LASTSEQ  = 'retrochat_lastseq_v0118';
+  const LS_MSGS_PFX = 'retrochat_msgs_v0118_';
   const MAX_CACHED_MSGS = 120;
   // LS_UNREAD y LS_READSEQ eliminados: estado de lectura viene del backend v0.1.3
 
@@ -717,7 +718,7 @@
   // Distinto de activeContact (que persiste al volver a la lista).
   // Solo se llama markRead si isChatViewOpen === true.
   let isChatViewOpen = false;
-  let pushToken = localStorage.getItem('retrochat_push_token_v0117') || '';
+  let pushToken = localStorage.getItem('retrochat_push_token_v0118') || '';
   let pushEnabled = !!pushToken;
 
   // ─── Audio (Web Audio API, sin archivos externos) ─────────────────────────
@@ -1848,7 +1849,7 @@
 
       pushToken = token;
       pushEnabled = true;
-      localStorage.setItem('retrochat_push_token_v0117', token);
+      localStorage.setItem('retrochat_push_token_v0118', token);
 
       await api('savePushToken', {
         usuario_id: me.id,
@@ -1880,6 +1881,30 @@
     }
   }
 
+  async function sendTestPush(){
+    if (!me) {
+      alert('Primero iniciá sesión.');
+      return;
+    }
+    if (!pushToken) {
+      alert('Primero tocá Activar notificaciones.');
+      return;
+    }
+
+    try {
+      $('supportStatus').textContent = 'Enviando prueba push...';
+
+      const r = await api('testPush', {
+        usuario_id: me.id,
+        token: pushToken
+      });
+
+      $('supportStatus').textContent = 'Prueba enviada. Resultado backend: ' + (r.enviados || 0) + ' enviada(s). Probá con la app en segundo plano.';
+    } catch(err) {
+      $('supportStatus').textContent = 'Error enviando prueba push: ' + (err.message || err);
+    }
+  }
+
 
   // ─── Escape ───────────────────────────────────────────────────────────────
 
@@ -1894,6 +1919,7 @@
   $('btnCloseSupport').addEventListener('click', closeSupport);
   $('supportWrap').addEventListener('click', (e) => { if (e.target === $('supportWrap')) closeSupport(); });
   $('btnEnablePush').addEventListener('click', enablePushNotifications);
+  $('btnTestPush').addEventListener('click', sendTestPush);
   $('btnCopyPushToken').addEventListener('click', copyPushToken);
   $('btnSupportRefresh').addEventListener('click', () => refreshAppData(true).catch(err => $('supportStatus').textContent = err.message));
   $('btnForceReload').addEventListener('click', forceReloadApp);
