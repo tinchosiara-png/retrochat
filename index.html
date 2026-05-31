@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.1.12a</title>
+  <title>RetroChat v0.1.12b</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -531,10 +531,10 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.1.12a';
-  const LS_USER    = 'retrochat_user_v0112a';
+  const APP_VERSION = '0.1.12b';
+  const LS_USER    = 'retrochat_user_v0112b';
   const LS_INVITE  = 'retrochat_invite_v0112';
-  const LS_LASTSEQ = 'retrochat_lastseq_v0112a';
+  const LS_LASTSEQ = 'retrochat_lastseq_v0112b';
   // LS_UNREAD y LS_READSEQ eliminados: estado de lectura viene del backend v0.1.3
 
   const $ = (id) => document.getElementById(id);
@@ -558,6 +558,10 @@
   let presencePollCount = 0;
   let unreadPollCount = 0;
   let nudgeCooldown = false;
+  // isChatViewOpen: true solo cuando el panel de chat está visualmente abierto.
+  // Distinto de activeContact (que persiste al volver a la lista).
+  // Solo se llama markRead si isChatViewOpen === true.
+  let isChatViewOpen = false;
 
   // ─── Audio (Web Audio API, sin archivos externos) ─────────────────────────
 
@@ -737,7 +741,7 @@
     const d = parseBackendDate(user && user.ultimo_online);
     if (!d) return false;
     const diffMs = Date.now() - d.getTime();
-    return diffMs >= -21600000 && diffMs <= 900000;
+    return diffMs >= -21600000 && diffMs <= 180000; // 3 min — más estricto que los 15min anteriores
   }
 
   function onlineDotClass(user){ return isRecentlyOnline(user) ? 'en_linea' : 'offline'; }
@@ -817,7 +821,8 @@
 
         if (ultimoSeq > currentNotified){
           // No sonar si el chat está abierto ahora mismo
-          const esActivo = activeChat && activeChat.chat_id === chatId;
+          // esActivo = chat abierto Y visible (no solo seleccionado)
+          const esActivo = isChatViewOpen && activeChat && activeChat.chat_id === chatId;
           if (!esActivo){
             const contacto = contacts.find(c => c.id === s.contact_id);
             const nombre   = contacto ? (contacto.nombre || contacto.usuario || 'RetroChat') : 'RetroChat';
@@ -911,6 +916,8 @@
   async function openContact(c){
     activeContact = c;
     renderContacts();
+    // Limpiar panel de mensajes inmediatamente — evita ver chat anterior
+    $('messages').innerHTML = '<div class="empty"><div><p style="color:#52708b">Cargando conversación…</p></div></div>';
     $('chatTitle').textContent = c.nombre || c.alias || c.usuario || 'Contacto';
     $('chatSub').textContent = onlineLabel(c) + ' · ' + (c.usuario ? '@' + c.usuario : (c.telefono ? 'Celular: ' + c.telefono : 'Chat directo'));
     $('chatAvatar').textContent = initials(c.nombre || c.alias || c.usuario);
@@ -918,6 +925,7 @@
     $('btnSend').disabled = false;
     $('btnNudge').disabled = false;
     $('shell').classList.add('chat-open');
+    isChatViewOpen = true;
 
     const r = await api('createOrGetDirectChat', { usuario_id: me.id, contacto_id: c.id });
     activeChat = r.chat;
@@ -928,9 +936,9 @@
 
     await loadMessages({ full:true });
 
-    // Marcar como leído en backend
+    // Marcar como leído al abrir el chat (isChatViewOpen ya es true aquí)
     const currentMax = maxSeqOf(messagesByChat[chatId]);
-    if (currentMax > 0){
+    if (isChatViewOpen && currentMax > 0){
       api('markRead', { usuario_id: me.id, chat_id: chatId, seq: currentMax }).catch(()=>{});
     }
     unreadByContactId[c.id] = 0;
@@ -1004,8 +1012,8 @@
       }
     }
 
-    // Si el chat está abierto, marcar como leído en backend
-    if (activeChat && activeChat.chat_id === chatId && activeContact && newMax > 0){
+    // Solo marcar leído si el panel de chat está visualmente abierto (no solo seleccionado)
+    if (isChatViewOpen && activeChat && activeChat.chat_id === chatId && activeContact && newMax > 0){
       api('markRead', { usuario_id: me.id, chat_id: chatId, seq: newMax }).catch(()=>{});
       unreadByContactId[activeContact.id] = 0;
       renderContacts();
@@ -1336,7 +1344,7 @@
   $('btnInvite').addEventListener('click', inviteWhatsApp);
   $('btnSend').addEventListener('click', sendMessage);
   $('btnNudge').addEventListener('click', sendNudge);
-  $('btnBack').addEventListener('click', () => $('shell').classList.remove('chat-open'));
+  $('btnBack').addEventListener('click', () => { $('shell').classList.remove('chat-open'); isChatViewOpen = false; });
   $('msgText').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
   });
