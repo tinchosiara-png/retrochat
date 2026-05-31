@@ -6,6 +6,7 @@ firebase.initializeApp({"apiKey": "AIzaSyAuepS1cLPxfWAl_GBzGkTW_-tL64Vet1I", "au
 try {
   const messaging = firebase.messaging();
 
+  // v0.2.1: FCM data-only. Este SW muestra la única notificación visible.
   messaging.onBackgroundMessage((payload) => {
     const data = payload && payload.data ? payload.data : {};
     const notification = payload && payload.notification ? payload.notification : {};
@@ -30,7 +31,7 @@ try {
 }
 
 
-const CACHE = 'retrochat-v0-2-0';
+const CACHE = 'retrochat-v0-2-1';
 const ASSETS = ['./','./index.html','./manifest.json','./icon.svg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
