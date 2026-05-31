@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.2.4 Push Chat</title>
+  <title>RetroChat v0.2.5 Push Chat</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -450,12 +450,12 @@
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.2.4 · Push Chat</small>
+        <small id="topVersion">v0.2.5 · Push Chat</small>
         <div class="header-actions">
           <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
           <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
         </div>
-        <div class="winbtns"><div class="winbtn">_</div><div class="winbtn">□</div><div class="winbtn">×</div></div>
+        
       </div>
 
       <div class="body">
@@ -496,6 +496,10 @@
                 <div class="hint">Se normaliza sin @, en minúsculas.</div>
               </div>
               <div class="field">
+                <label>PIN</label>
+                <input id="regPin" type="password" inputmode="numeric" placeholder="mínimo 4 números" />
+              </div>
+              <div class="field">
                 <label>Celular <span style="font-weight:normal">(opcional)</span></label>
                 <input id="regPhone" inputmode="numeric" autocomplete="tel" placeholder="Ej: 543471234567" />
                 <div class="hint">Solo si querés que te agreguen por número o invitar por WhatsApp.</div>
@@ -514,10 +518,6 @@
                   <span>Recomendado para recibir mensajes aunque RetroChat esté en segundo plano.</span>
                 </span>
               </label>
-              <div class="field">
-                <label>PIN</label>
-                <input id="regPin" type="password" inputmode="numeric" placeholder="mínimo 4 números" />
-              </div>
               <button id="btnRegister" class="primary" type="button">Crear cuenta</button>
             </div>
 
@@ -681,7 +681,7 @@
         <div class="support-grid">
           <div class="support-section-title">Estado general</div>
           <div class="support-row"><b>App</b><span>RetroChat</span></div>
-          <div class="support-row"><b>Versión</b><span id="supportFront">v0.2.4 Push Chat</span></div>
+          <div class="support-row"><b>Versión</b><span id="supportFront">v0.2.5 Push Chat</span></div>
           <div class="support-row"><b>Backend</b><span id="supportBack">consultando...</span></div>
           <div class="support-row"><b>Usuario</b><span id="supportUser">—</span></div>
 
@@ -699,7 +699,7 @@
             <div class="support-row"><b>No leídos</b><span id="supportUnread">—</span></div>
             <div class="support-row"><b>Token push</b><span id="supportPushToken">—</span></div>
             <div class="support-row"><b>Push foreground</b><span id="supportPushFg">esperando</span></div>
-            <div class="support-row"><b>Cache</b><span>retrochat-v0-2-4</span></div>
+            <div class="support-row"><b>Cache</b><span>retrochat-v0-2-5</span></div>
           </div>
         </div>
         <div id="supportStatus" class="status"></div>
@@ -722,7 +722,7 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.2.4';
+  const APP_VERSION = '0.2.5';
 
   const FIREBASE_CONFIG = {
   "apiKey": "AIzaSyAuepS1cLPxfWAl_GBzGkTW_-tL64Vet1I",
