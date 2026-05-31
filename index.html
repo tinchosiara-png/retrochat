@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#1676d2" />
-  <title>RetroChat v0.1.12d</title>
+  <title>RetroChat v0.1.12e</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{
@@ -155,6 +155,38 @@
     .profile p{font-size:12px;margin:3px 0 0;color:#4c6f8d}
     .toolbar{padding:10px;display:flex;gap:8px;border-bottom:1px solid #9ac6e6;flex-wrap:wrap}
     .toolbar .secondary{flex:1;font-size:12px;min-width:92px}
+
+    .contact-panel-head{
+      padding:11px 14px 9px;
+      border-bottom:1px solid #9ac6e6;
+      background:linear-gradient(#ffffffaa,#dff3ffaa);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .contact-panel-head strong{display:block;font-size:14px;color:#0b3f73}
+    .contact-panel-head small{display:block;font-size:11px;color:#5f7488;margin-top:2px}
+    .contact-meta-pill{
+      font-size:11px;
+      color:#0b4e8f;
+      background:#fff;
+      border:1px solid #9ac6e6;
+      border-radius:999px;
+      padding:4px 8px;
+      white-space:nowrap;
+    }
+    .contact.active{
+      background:#fff9d2;
+      border-color:#e5bc47;
+    }
+    .msg.sending{opacity:.72}
+    .msg.error{border-color:#dc7b7b;background:#ffecec}
+    .msg .time.sending{color:#9a7a00;font-style:italic}
+    .msg .time.error{color:#b91c1c;font-weight:bold}
+    .msg-nudge.sending{opacity:.72}
+    .msg-nudge.error{border-color:#dc7b7b;background:#ffecec;color:#9b1c1c}
+
     .contact-list{overflow:auto;padding:8px;flex:1}
     .contact{
       display:flex;align-items:center;gap:10px;padding:10px;border:1px solid transparent;
@@ -219,7 +251,7 @@
     .composer textarea{min-height:44px;max-height:110px;resize:none}
     .composer .primary{width:auto;min-width:88px;height:44px}
 
-    /* Botón nudge */
+    /* Botón zumbido */
     .btn-nudge{
       width:44px;height:44px;border-radius:10px;flex:0 0 auto;
       border:1px solid #9ac6e6;
@@ -232,8 +264,8 @@
     .btn-nudge:active{transform:scale(.92)}
     .btn-nudge:disabled{opacity:.4}
 
-    /* Animación nudge en el chat abierto */
-    @keyframes nudgeShake {
+    /* Animación zumbido en el chat abierto */
+    @keyframes zumbidoShake {
       0%  { transform: translate(0,0) rotate(0deg); }
       10% { transform: translate(-6px,-4px) rotate(-2deg); }
       20% { transform: translate(6px,4px) rotate(2deg); }
@@ -247,10 +279,10 @@
       100%{ transform: translate(0,0) rotate(0deg); }
     }
     .window.nudging{
-      animation: nudgeShake .6s ease;
+      animation: zumbidoShake .6s ease;
     }
 
-    /* Mensaje de sistema nudge */
+    /* Mensaje de sistema zumbido */
     .msg-nudge{
       text-align:center;
       font-size:12px;
@@ -352,7 +384,7 @@
       <div class="titlebar">
         <div class="orb"></div>
         <strong>RetroChat</strong>
-        <small id="topVersion">v0.1.12 · Messenger vibes, moderno por dentro</small>
+        <small id="topVersion">v0.1.12e · Messenger vibes, moderno por dentro</small>
         <div class="header-actions">
           <button id="btnHeaderRefresh" class="headbtn" type="button" title="Actualizar datos">↻</button>
           <button id="btnSupport" class="headbtn" type="button" title="Soporte">Soporte</button>
@@ -430,6 +462,13 @@
               <button id="btnRefresh" class="secondary" type="button">Actualizar</button>
               <button id="btnLogout" class="secondary danger" type="button">Salir</button>
             </div>
+            <div class="contact-panel-head">
+              <div>
+                <strong>Conversaciones</strong>
+                <small id="contactSummary">Sincronizando contactos...</small>
+              </div>
+              <span id="onlineSummary" class="contact-meta-pill">0 online</span>
+            </div>
             <div id="contactList" class="contact-list"></div>
           </aside>
 
@@ -453,7 +492,7 @@
             </div>
             <div class="composer">
               <textarea id="msgText" placeholder="Escribí un mensaje..." disabled></textarea>
-              <button id="btnNudge" class="btn-nudge" type="button" title="Nudge!" disabled>👋</button>
+              <button id="btnNudge" class="btn-nudge" type="button" title="Zumbido" aria-label="Enviar zumbido" disabled>👋</button>
               <button id="btnSend" class="primary" type="button" disabled>Enviar</button>
             </div>
           </main>
@@ -518,7 +557,7 @@
           <div class="support-row"><b>Último seq</b><span id="supportSeq">—</span></div>
           <div class="support-row"><b>Última lectura</b><span id="supportLastPoll">—</span></div>
           <div class="support-row"><b>No leídos</b><span id="supportUnread">—</span></div>
-          <div class="support-row"><b>Cache</b><span>retrochat-v0-1-11</span></div>
+          <div class="support-row"><b>Cache</b><span>retrochat-v0-1-12e</span></div>
         </div>
         <div id="supportStatus" class="status"></div>
         <div class="support-actions">
@@ -532,11 +571,11 @@
 <script>
 (() => {
   const API = 'https://script.google.com/macros/s/AKfycbxFntZeCOtz3HiY3E7MUCDXHNYZCMT7S7WJo9nGMGvG_xTu3GR10BnV1Zvj-5AyG4B5JA/exec';
-  const APP_VERSION = '0.1.12d';
-  const LS_USER    = 'retrochat_user_v0112d';
+  const APP_VERSION = '0.1.12e';
+  const LS_USER    = 'retrochat_user_v0112e';
   const LS_INVITE  = 'retrochat_invite_v0112';
-  const LS_LASTSEQ  = 'retrochat_lastseq_v0112d';
-  const LS_MSGS_PFX = 'retrochat_msgs_v0112d_';
+  const LS_LASTSEQ  = 'retrochat_lastseq_v0112e';
+  const LS_MSGS_PFX = 'retrochat_msgs_v0112e_';
   const MAX_CACHED_MSGS = 120;
   // LS_UNREAD y LS_READSEQ eliminados: estado de lectura viene del backend v0.1.3
 
@@ -560,7 +599,9 @@
   let pollingActive = false;
   let presencePollCount = 0;
   let unreadPollCount = 0;
-  let nudgeCooldown = false;
+  let zumbidoCooldown = false;
+  let pendingLocalById = {};
+  let notifiedEventKeys = {};
   let chatRequestId = 0;  // token — descarta respuestas de chats anteriores
   // isChatViewOpen: true solo cuando el panel de chat está visualmente abierto.
   // Distinto de activeContact (que persiste al volver a la lista).
@@ -619,7 +660,7 @@
     } catch(e){}
   }
 
-  // Sonido de nudge: secuencia tipo "bzzz bzzz" con vibrato
+  // Sonido de zumbido: secuencia tipo "bzzz bzzz" con vibrato
   function playSoundNudge(){
     try {
       const ctx = getAudioCtx();
@@ -640,7 +681,7 @@
         osc.stop(startTime + 0.13);
       }
 
-      // Tres pulsos rápidos: el clásico nudge de MSN/Messenger
+      // Tres pulsos rápidos: el clásico zumbido de MSN/Messenger
       buzz(t,       200);
       buzz(t + 0.15, 220);
       buzz(t + 0.30, 200);
@@ -675,7 +716,7 @@
 
   // ─── Nudge ────────────────────────────────────────────────────────────────
 
-  // El nudge se envía como mensaje especial con texto fijo.
+  // El zumbido se envía como mensaje especial con texto fijo.
   // Al recibirlo, el receptor ve la animación + sonido + vibración.
   const NUDGE_TEXT = '\u0007__NUDGE__\u0007'; // BEL char como marcador interno
 
@@ -693,25 +734,50 @@
   }
 
   async function sendNudge(){
-    if (!activeChat || !me || nudgeCooldown) return;
-    nudgeCooldown = true;
+    if (!activeChat || !me || zumbidoCooldown) return;
+    zumbidoCooldown = true;
     $('btnNudge').disabled = true;
 
+    const chatId = activeChat.chat_id;
+    const localId = makeLocalId();
+    const localMsg = {
+      id: localId,
+      local_id: localId,
+      local: true,
+      chat_id: chatId,
+      seq: '',
+      fecha: nowLocal(),
+      usuario_id: me.id,
+      usuario_nombre: me.nombre || me.alias || me.usuario || 'Yo',
+      texto: NUDGE_TEXT,
+      estado: 'enviando',
+      leido_por: me.id
+    };
+
+    pendingLocalById[localId] = localMsg;
+    upsertLocalMessage(chatId, localMsg);
+    playSoundSent();
+    vibrate([35]);
+
     try {
-      await api('sendMessage', {
-        chat_id: activeChat.chat_id,
+      const r = await api('sendMessage', {
+        chat_id: chatId,
         usuario_id: me.id,
         texto: NUDGE_TEXT
       });
-      playSoundNudge();
-      vibrate([60, 40, 60]);
-      await loadMessages({ full:false });
+      if (r && r.mensaje) {
+        replaceLocalWithReal(chatId, localId, r.mensaje);
+        lastSeqByChat[chatId] = Math.max(Number(lastSeqByChat[chatId] || 0), Number(r.mensaje.seq || 0));
+        saveJson(LS_LASTSEQ, lastSeqByChat);
+        if (activeChat && activeChat.chat_id === chatId) $('chatSeq').textContent = 'seq: ' + lastSeqByChat[chatId];
+      }
     } catch(err){
-      alert('No se pudo enviar el nudge: ' + err.message);
+      markLocalError(chatId, localId);
+      console.warn('No se pudo enviar el zumbido:', err);
     } finally {
       // Cooldown de 8 segundos para no spamear
       setTimeout(() => {
-        nudgeCooldown = false;
+        zumbidoCooldown = false;
         if (activeChat) $('btnNudge').disabled = false;
       }, 8000);
     }
@@ -774,6 +840,93 @@
         localStorage.setItem(LS_MSGS_PFX + chatId, JSON.stringify(msgs.slice(-MAX_CACHED_MSGS)));
       } catch(e2){}
     }
+  }
+
+  function makeLocalId(){
+    return 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+  }
+
+  function isLocalMessage(m){
+    return String(m && m.id || '').startsWith('local-') || m.local === true;
+  }
+
+  function samePendingMessage(localMsg, realMsg){
+    if (!localMsg || !realMsg) return false;
+    if (!isLocalMessage(localMsg)) return false;
+    if (localMsg.usuario_id !== realMsg.usuario_id) return false;
+    return String(localMsg.texto || '') === String(realMsg.texto || '');
+  }
+
+  function upsertLocalMessage(chatId, msg){
+    if (!chatId || !msg) return;
+    const list = messagesByChat[chatId] || [];
+    const idx = list.findIndex(m => m.id === msg.id);
+    if (idx >= 0) list[idx] = msg;
+    else list.push(msg);
+    messagesByChat[chatId] = list.slice(-150);
+    saveCachedMsgs(chatId, messagesByChat[chatId]);
+    if (activeChat && activeChat.chat_id === chatId) renderMessages(messagesByChat[chatId]);
+  }
+
+  function mergeRealMessages(chatId, incoming){
+    if (!chatId || !incoming || !incoming.length) return;
+    const existing = messagesByChat[chatId] || [];
+
+    incoming.forEach(real => {
+      const realId = String(real.id || '');
+      const realIdx = existing.findIndex(m => String(m.id || '') === realId);
+      if (realIdx >= 0) {
+        existing[realIdx] = real;
+        return;
+      }
+
+      const pendingIdx = existing.findIndex(m => samePendingMessage(m, real));
+      if (pendingIdx >= 0) {
+        delete pendingLocalById[existing[pendingIdx].id];
+        existing[pendingIdx] = real;
+        return;
+      }
+
+      existing.push(real);
+    });
+
+    existing.sort((a,b) => Number(a.seq || 0) - Number(b.seq || 0));
+    messagesByChat[chatId] = existing.slice(-150);
+    saveCachedMsgs(chatId, messagesByChat[chatId]);
+  }
+
+  function replaceLocalWithReal(chatId, localId, realMsg){
+    const list = messagesByChat[chatId] || [];
+    const idx = list.findIndex(m => m.id === localId);
+    if (idx >= 0) {
+      list[idx] = realMsg;
+      delete pendingLocalById[localId];
+      list.sort((a,b) => Number(a.seq || 0) - Number(b.seq || 0));
+      messagesByChat[chatId] = list.slice(-150);
+      saveCachedMsgs(chatId, messagesByChat[chatId]);
+      if (activeChat && activeChat.chat_id === chatId) renderMessages(messagesByChat[chatId]);
+    } else {
+      mergeRealMessages(chatId, [realMsg]);
+    }
+  }
+
+  function markLocalError(chatId, localId){
+    const list = messagesByChat[chatId] || [];
+    const idx = list.findIndex(m => m.id === localId);
+    if (idx >= 0) {
+      list[idx].estado = 'error';
+      list[idx].error = true;
+      messagesByChat[chatId] = list;
+      saveCachedMsgs(chatId, list);
+      if (activeChat && activeChat.chat_id === chatId) renderMessages(list);
+    }
+  }
+
+  function shouldPlayEvent(chatId, seq, type){
+    const key = chatId + ':' + String(seq || '') + ':' + (type || 'msg');
+    if (notifiedEventKeys[key]) return false;
+    notifiedEventKeys[key] = true;
+    return true;
   }
 
   function encodeData(data){
@@ -844,7 +997,7 @@
           if (!esActivo){
             const contacto = contacts.find(c => c.id === s.contact_id);
             const nombre   = contacto ? (contacto.nombre || contacto.usuario || 'RetroChat') : 'RetroChat';
-            // Pedir los mensajes nuevos de este chat para detectar nudge
+            // Pedir los mensajes nuevos de este chat para detectar zumbido
             // Usamos un fetch liviano en background
             (async () => {
               try {
@@ -854,9 +1007,17 @@
                 const nuevos = (rMsg.mensajes || []).filter(m => m.usuario_id !== me.id);
                 const hayNudge   = nuevos.some(isNudgeMsg);
                 const hayMensaje = nuevos.some(m => !isNudgeMsg(m));
-                if (hayNudge)   { playSoundNudge(); vibrate([80,60,80,60,80]); triggerNudgeEffect(''); }
-                if (hayMensaje) { playSoundIncoming(); vibrate([60]); showNotification(nombre, s.unread_count + ' mensaje(s) sin leer'); }
-                if (!hayNudge && !hayMensaje) { playSoundIncoming(); vibrate([60]); showNotification(nombre, s.unread_count + ' mensaje(s) sin leer'); }
+                if (hayNudge) {
+                  const n = nuevos.find(isNudgeMsg);
+                  if (shouldPlayEvent(chatId, n && n.seq || ultimoSeq, 'zumbido')) { playSoundNudge(); vibrate([80,60,80,60,80]); triggerNudgeEffect(''); }
+                }
+                if (hayMensaje) {
+                  const ultimo = nuevos.filter(m => !isNudgeMsg(m)).pop();
+                  if (shouldPlayEvent(chatId, ultimo && ultimo.seq || ultimoSeq, 'mensaje')) { playSoundIncoming(); vibrate([60]); showNotification(nombre, s.unread_count + ' mensaje(s) sin leer'); }
+                }
+                if (!hayNudge && !hayMensaje) {
+                  if (shouldPlayEvent(chatId, ultimoSeq, 'mensaje')) { playSoundIncoming(); vibrate([60]); showNotification(nombre, s.unread_count + ' mensaje(s) sin leer'); }
+                }
               } catch(e){
                 playSoundIncoming(); vibrate([60]); showNotification(nombre, s.unread_count + ' mensaje(s) sin leer');
               }
@@ -875,6 +1036,10 @@
 
   function renderContacts(){
     const box = $('contactList');
+    const totalUnread = Object.values(unreadByContactId).reduce((a,b)=>a+Number(b||0),0);
+    const onlineCount = contacts.filter(c => isRecentlyOnline(c)).length;
+    if ($('contactSummary')) $('contactSummary').textContent = contacts.length + ' contacto(s)' + (totalUnread ? ' · ' + totalUnread + ' sin leer' : ' · todo al día');
+    if ($('onlineSummary')) $('onlineSummary').textContent = onlineCount + ' online';
     box.innerHTML = '';
     if (!contacts.length){
       box.innerHTML = '<div class="empty" style="height:auto;padding:18px"><div><b>Sin contactos todavía</b><p>Usá "Agregar" para buscar por celular/usuario o invitar por WhatsApp.</p></div></div>';
@@ -905,7 +1070,7 @@
     if (!me) return;
     const r = await api('getContacts', { usuario_id: me.id });
     contacts = r.contactos || [];
-    saveJson('retrochat_contacts_v0112d', contacts);
+    saveJson('retrochat_contacts_v0112e', contacts);
     if (activeContact) {
       const updated = contacts.find(c => c.id === activeContact.id);
       if (updated){
@@ -926,18 +1091,23 @@
     box.innerHTML = '';
     msgs.forEach(m => {
       const div = document.createElement('div');
+      const sending = m.estado === 'enviando';
+      const failed = m.estado === 'error' || m.error;
+      const stateText = failed ? 'No enviado' : (sending ? 'Enviando...' : ('#' + escapeHtml(String(m.seq || '')) + ' · ' + escapeHtml(m.fecha || '')));
+      const stateClass = failed ? ' error' : (sending ? ' sending' : '');
+
       if (isNudgeMsg(m)){
-        div.className = 'msg-nudge';
+        div.className = 'msg-nudge' + stateClass;
         const esPropio = m.usuario_id === me.id;
         div.textContent = esPropio
-          ? '👋 Mandaste un nudge!'
-          : '👋 ' + escapeHtml(m.usuario_nombre || 'Contacto') + ' te mandó un nudge!';
+          ? '👋 Mandaste un zumbido' + (sending ? ' · enviando...' : failed ? ' · no enviado' : '')
+          : '👋 ' + escapeHtml(m.usuario_nombre || 'Contacto') + ' te mandó un zumbido';
       } else {
-        div.className = 'msg' + (m.usuario_id === me.id ? ' me' : '');
+        div.className = 'msg' + (m.usuario_id === me.id ? ' me' : '') + stateClass;
         div.innerHTML = `
           <div class="who">${escapeHtml(m.usuario_nombre || 'Usuario')} dice:</div>
           <div class="txt">${escapeHtml(m.texto || '')}</div>
-          <div class="time">#${escapeHtml(String(m.seq || ''))} · ${escapeHtml(m.fecha || '')}</div>`;
+          <div class="time${stateClass}">${stateText}</div>`;
       }
       box.appendChild(div);
     });
@@ -962,7 +1132,7 @@
     $('btnNudge').disabled = false;
     $('shell').classList.add('chat-open');
 
-    const _chatIdMap = loadJson('retrochat_chatidmap_v0112d', {});
+    const _chatIdMap = loadJson('retrochat_chatidmap_v0112e', {});
     const _knownChatId = _chatIdMap[c.id];
     if (_knownChatId){
       const _pre = loadCachedMsgs(_knownChatId);
@@ -978,9 +1148,9 @@
     activeChat = r.chat;
     chatByContactId[c.id] = activeChat;
     const chatId = activeChat.chat_id;
-    const chatIdMap = loadJson('retrochat_chatidmap_v0112d', {});
+    const chatIdMap = loadJson('retrochat_chatidmap_v0112e', {});
     chatIdMap[c.id] = chatId;
-    saveJson('retrochat_chatidmap_v0112d', chatIdMap);
+    saveJson('retrochat_chatidmap_v0112e', chatIdMap);
     const cached = loadCachedMsgs(chatId);
     if (cached.length){
       messagesByChat[chatId] = cached;
@@ -1014,6 +1184,8 @@
       limit: opts.full ? 100 : 50
     });
 
+    if (myReqId && myReqId !== chatRequestId) return;
+
     const incoming = r.mensajes || [];
     lastPollAt = nowLocal();
 
@@ -1021,13 +1193,9 @@
     const previousMax = maxSeqOf(messagesByChat[chatId] || []);
 
     if (opts.full){
-      messagesByChat[chatId] = incoming;
+      mergeRealMessages(chatId, incoming);
     } else if (incoming.length){
-      const existing = messagesByChat[chatId] || [];
-      const seen = new Set(existing.map(m => m.id));
-      incoming.forEach(m => { if (!seen.has(m.id)) existing.push(m); });
-      existing.sort((a,b) => Number(a.seq||0) - Number(b.seq||0));
-      messagesByChat[chatId] = existing.slice(-150);
+      mergeRealMessages(chatId, incoming);
     }
 
     // Calcular nuevo máximo real
@@ -1042,7 +1210,7 @@
     saveJson(LS_LASTSEQ, lastSeqByChat);
     $('chatSeq').textContent = 'seq: ' + nextLastSeq;
 
-    // Mensajes nuevos del otro mientras el chat está abierto: sonido/nudge
+    // Mensajes nuevos del otro mientras el chat está abierto: sonido/zumbido
     // El sonido de chats en segundo plano lo maneja applyUnreadSummary_
     if (!opts.full && newMax > previousMax){
       const nuevos = (messagesByChat[chatId] || []).filter(m =>
@@ -1052,15 +1220,20 @@
         const hayNudge  = nuevos.some(isNudgeMsg);
         const hayMensaje = nuevos.some(m => !isNudgeMsg(m));
 
-        if (hayNudge) triggerNudgeEffect(activeContact ? activeContact.nombre : '');
+        if (hayNudge){
+          const n = nuevos.find(isNudgeMsg);
+          if (shouldPlayEvent(chatId, n && n.seq, 'zumbido')) triggerNudgeEffect(activeContact ? activeContact.nombre : '');
+        }
         if (hayMensaje){
-          playSoundIncoming();
-          vibrate([60]);
           const ultimo = nuevos.filter(m => !isNudgeMsg(m)).pop();
-          showNotification(
-            activeContact ? (activeContact.nombre || activeContact.usuario || 'RetroChat') : 'RetroChat',
-            ultimo ? ultimo.texto : 'Nuevo mensaje'
-          );
+          if (shouldPlayEvent(chatId, ultimo && ultimo.seq, 'mensaje')){
+            playSoundIncoming();
+            vibrate([60]);
+            showNotification(
+              activeContact ? (activeContact.nombre || activeContact.usuario || 'RetroChat') : 'RetroChat',
+              ultimo ? ultimo.texto : 'Nuevo mensaje'
+            );
+          }
         }
       }
     }
@@ -1081,18 +1254,41 @@
 
   async function sendMessage(){
     const txt = $('msgText').value.trim();
-    if (!txt || !activeChat) return;
-    $('btnSend').disabled = true;
+    if (!txt || !activeChat || !me) return;
+
+    const chatId = activeChat.chat_id;
+    const localId = makeLocalId();
+    const localMsg = {
+      id: localId,
+      local_id: localId,
+      local: true,
+      chat_id: chatId,
+      seq: '',
+      fecha: nowLocal(),
+      usuario_id: me.id,
+      usuario_nombre: me.nombre || me.alias || me.usuario || 'Yo',
+      texto: txt,
+      estado: 'enviando',
+      leido_por: me.id
+    };
+
+    $('msgText').value = '';
+    pendingLocalById[localId] = localMsg;
+    upsertLocalMessage(chatId, localMsg);
+    playSoundSent();
+    $('msgText').focus();
+
     try{
-      await api('sendMessage', { chat_id: activeChat.chat_id, usuario_id: me.id, texto: txt });
-      $('msgText').value = '';
-      playSoundSent();
-      await loadMessages({ full:false });
+      const r = await api('sendMessage', { chat_id: chatId, usuario_id: me.id, texto: txt });
+      if (r && r.mensaje) {
+        replaceLocalWithReal(chatId, localId, r.mensaje);
+        lastSeqByChat[chatId] = Math.max(Number(lastSeqByChat[chatId] || 0), Number(r.mensaje.seq || 0));
+        saveJson(LS_LASTSEQ, lastSeqByChat);
+        if (activeChat && activeChat.chat_id === chatId) $('chatSeq').textContent = 'seq: ' + lastSeqByChat[chatId];
+      }
     }catch(err){
-      alert('No se pudo enviar: ' + err.message);
-    }finally{
-      $('btnSend').disabled = false;
-      $('msgText').focus();
+      markLocalError(chatId, localId);
+      console.warn('No se pudo enviar:', err);
     }
   }
 
